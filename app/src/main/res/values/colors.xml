@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#262F42</color>
+    <color name="colorPrimaryDark">#1C2230</color>
+    <color name="colorAccent">#9197AE</color>
+    <color name="dark">#0F0F0F</color>
+    <color name="titles">#DDDDDD</color>
+    <color name="overview">#AAAAAA</color>
+    <color name="cursorAccent">#AAAAAA</color>
+    <color name="controlActivated">#AAAAAA</color>
+    <color name="controlNormal">#AAAAAA</color>
+
+</resources>

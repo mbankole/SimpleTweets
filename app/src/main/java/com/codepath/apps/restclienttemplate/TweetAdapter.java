@@ -3,6 +3,7 @@ package com.codepath.apps.restclienttemplate;
 import android.content.Context;
 import android.content.Intent;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
@@ -39,6 +40,7 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder>{
     private List<Tweet> mTweets;
     Context context;
     ViewGroup mParent;
+    FragmentManager fm;
 
     String TAG = "TweetAdapter";
     // tweets array into the constructor
@@ -232,10 +234,9 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder>{
 
                 } else if (v.getId() == btReply.getId()) {
                     debug("clicked reply button");
-                    Intent intent = new Intent(context, ComposeActivity.class);
-                    intent.putExtra("reply", tweet.user.screenName);
-                    intent.putExtra("reply_id", tweet.uid);
-                    context.startActivity(intent);
+                    ComposeTweetDialogFragment composeTweetDialogFragment =
+                            ComposeTweetDialogFragment.newInstance("Replying to " + tweet.user.name, tweet.user.screenName, tweet.uid);
+                    composeTweetDialogFragment.show(fm, "fragment_edit_name");
                     return;
                 } else {
                     Toast.makeText(context, "DETAIL", Toast.LENGTH_LONG).show();

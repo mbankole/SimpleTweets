@@ -1,8 +1,10 @@
 package com.codepath.apps.restclienttemplate;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
@@ -27,7 +29,7 @@ import cz.msebera.android.httpclient.Header;
 
 import static com.loopj.android.http.AsyncHttpClient.log;
 
-public class TimelineActivity extends AppCompatActivity {
+public class TimelineActivity extends AppCompatActivity implements ComposeTweetDialogFragment.ComposeTweetDialogListener{
 
     private TwitterClient client;
     private String TAG = "TimelineActivityStuff";
@@ -35,8 +37,6 @@ public class TimelineActivity extends AppCompatActivity {
     ArrayList<Tweet> tweets;
     RecyclerView rvTweets;
     private SwipeRefreshLayout swipeContainer;
-
-
 
 
     private final int REQUEST_CODE = 20;
@@ -51,15 +51,26 @@ public class TimelineActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         client = TwitterApp.getRestClient();
+        final Context context = this;
         //find the recyclerview
         rvTweets = (RecyclerView)findViewById(R.id.rvTweet);
         //init the arraylist
         tweets = new ArrayList<>();
         //construct the adapter
         tweetAdapter = new TweetAdapter(tweets);
+        tweetAdapter.fm = getSupportFragmentManager();
         //recyclerview setup
-        rvTweets.setLayoutManager(new LinearLayoutManager(this));
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        rvTweets.setLayoutManager(layoutManager);
         rvTweets.setAdapter(tweetAdapter);
+        EndlessRecyclerViewScrollListener scroller = new EndlessRecyclerViewScrollListener(layoutManager) {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+                Toast.makeText(context, "WHAT MORE", Toast.LENGTH_LONG).show();
+                loadMoreTimeline(totalItemsCount - 1);
+            }
+        };
+        rvTweets.addOnScrollListener(scroller);
 
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(rvTweets.getContext(),
                 Configuration.ORIENTATION_PORTRAIT);
@@ -77,51 +88,57 @@ public class TimelineActivity extends AppCompatActivity {
                 populateTimeline();
             }
         });
-
-        /*
-        rvTweets.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
-            @Override
-            public void onTouchEvent(RecyclerView recycler, MotionEvent event) {
-                int position = getAdapterPosition();
-                if (position != RecyclerView.NO_POSITION) {
-                    if (v.getId() == btReply.getId()) {
-                        debug("clicked reply button");
-                        Toast.makeText(context, "REPLY", Toast.LENGTH_LONG).show();
-                        Tweet tweet = mTweets.get(position);
-                        Intent intent = new Intent(context, ComposeActivity.class);
-                        intent.putExtra("reply", tweet.user.screenName);
-                        context.startActivity(intent);
-                        return;
-                    } else {
-                        Toast.makeText(context, "DETAIL", Toast.LENGTH_LONG).show();
-                        // make sure the position is valid, i.e. actually exists in the view
-                        // get the movie at the position, this won't work if the class is static
-                        Tweet tweet = mTweets.get(position);
-                        // create intent for the new activity
-                        Intent intent = new Intent(context, TweetDetailActivity.class);
-                        // serialize the movie using parceler, use its short name as a key
-                        intent.putExtra("tweet", tweet);
-                        intent.putExtra("user", tweet.user);
-                        // show the activity
-                        context.startActivity(intent);
-                    }
-                }
-            }
-            @Override
-            public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
-                return;
-            }
-
-            @Override
-            public boolean onInterceptTouchEvent(RecyclerView recycler, MotionEvent event) {
-                return false;
-            }
-        });*/
-
         populateTimeline();
     }
 
+    private void loadMoreTimeline(int lastIndex) {
+        long lastId = tweets.get(lastIndex).getUid();
+        debug(String.valueOf(lastId));
+        client.getHomeTimelineBefore(lastId, new JsonHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                log.d("TwitterClient", response.toString());
+            }
+
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
+                log.d("TwitterClient", response.toString());
+                for (int i = 0; i < response.length(); i++) {
+                    try {
+                        Tweet tweet = Tweet.fromJSON(response.getJSONObject(i));
+                        tweets.add(tweet);
+                        tweetAdapter.notifyItemInserted(tweets.size() - 1);
+                        swipeContainer.setRefreshing(false);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                log.d("TwitterClient", responseString);
+                throwable.printStackTrace();
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                log.d("TwitterClient", errorResponse.toString());
+                throwable.printStackTrace();
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
+                log.d("TwitterClient", errorResponse.toString());
+                throwable.printStackTrace();
+            }
+        });
+    }
+
+
     private void populateTimeline() {
+        swipeContainer.setRefreshing(true);
+
         client.getHomeTimeline( new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
@@ -170,13 +187,12 @@ public class TimelineActivity extends AppCompatActivity {
     }
 
     public void onComposeAction(MenuItem mi) {
-        Toast.makeText(this, "COMPOSE", Toast.LENGTH_LONG).show();
-        Intent i = new Intent(TimelineActivity.this, ComposeActivity.class);
-        startActivityForResult(i, REQUEST_CODE);
+        showEditDialog();
     }
 
     public void onProfileAction(MenuItem mi) {
         Toast.makeText(this, "PROFILE", Toast.LENGTH_LONG).show();
+        showEditDialog();
     }
 
     @Override
@@ -243,7 +259,22 @@ public class TimelineActivity extends AppCompatActivity {
         });
     }
 
+    private void showEditDialog() {
+        FragmentManager fm = getSupportFragmentManager();
+        ComposeTweetDialogFragment composeTweetDialogFragment = ComposeTweetDialogFragment.newInstance("Compose New Tweet");
+        composeTweetDialogFragment.show(fm, "fragment_edit_name");
+    }
+
+
     public void debug(String message) {
         log.d(TAG, message);
+    }
+
+    @Override
+    public void onFinishEditTweet(Tweet tweet) {
+        debug("got tweet " + tweet.toString());
+        tweets.add(0, tweet);
+        tweetAdapter.notifyItemInserted(0);
+        rvTweets.smoothScrollToPosition(0);
     }
 }

@@ -16,6 +16,7 @@ public class Tweet implements Parcelable{
     public String createdAt;
     public User user;
     public int reTweetCount;
+    public int favoritesCount;
     public String inReplyToScreenname;
     public boolean favorited;
     // deserialze data
@@ -32,6 +33,7 @@ public class Tweet implements Parcelable{
         tweet.inReplyToScreenname = obj.getString("in_reply_to_screen_name");
         tweet.favorited = obj.getBoolean("favorited");
         tweet.user = User.fromJSON(obj.getJSONObject("user"));
+        tweet.favoritesCount = 0;//obj.getInt("favorites_count");
         return tweet;
     }
 
@@ -89,6 +91,7 @@ public class Tweet implements Parcelable{
         dest.writeString(this.createdAt);
         dest.writeParcelable(this.user, flags);
         dest.writeInt(this.reTweetCount);
+        dest.writeInt(this.favoritesCount);
         dest.writeString(this.inReplyToScreenname);
         dest.writeByte(this.favorited ? (byte) 1 : (byte) 0);
     }
@@ -99,6 +102,7 @@ public class Tweet implements Parcelable{
         this.createdAt = in.readString();
         this.user = in.readParcelable(User.class.getClassLoader());
         this.reTweetCount = in.readInt();
+        this.favoritesCount = in.readInt();
         this.inReplyToScreenname = in.readString();
         this.favorited = in.readByte() != 0;
     }

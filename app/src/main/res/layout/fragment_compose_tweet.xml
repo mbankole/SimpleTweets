@@ -24,6 +24,8 @@
         android:layout_height="wrap_content"
         android:text="Tweet"
         android:layout_marginBottom="10dp"
+        android:textColor="@android:color/primary_text_dark"
+        android:background="@color/colorPrimary"
         android:layout_below="@+id/tvCharCount"
         android:layout_centerHorizontal="true" />
 

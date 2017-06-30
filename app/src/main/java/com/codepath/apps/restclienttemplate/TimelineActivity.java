@@ -58,7 +58,9 @@ public class TimelineActivity extends AppCompatActivity implements ComposeTweetD
         tweets = new ArrayList<>();
         //construct the adapter
         tweetAdapter = new TweetAdapter(tweets);
-        tweetAdapter.fm = getSupportFragmentManager();
+
+
+
         //recyclerview setup
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         rvTweets.setLayoutManager(layoutManager);
@@ -66,7 +68,7 @@ public class TimelineActivity extends AppCompatActivity implements ComposeTweetD
         EndlessRecyclerViewScrollListener scroller = new EndlessRecyclerViewScrollListener(layoutManager) {
             @Override
             public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
-                Toast.makeText(context, "WHAT MORE", Toast.LENGTH_LONG).show();
+                //Toast.makeText(context, "WHAT MORE", Toast.LENGTH_LONG).show();
                 loadMoreTimeline(totalItemsCount - 1);
             }
         };
@@ -88,11 +90,21 @@ public class TimelineActivity extends AppCompatActivity implements ComposeTweetD
                 populateTimeline();
             }
         });
+
+        //jank shit
+        tweetAdapter.fm = getSupportFragmentManager();
+        tweetAdapter.swipeContainer = swipeContainer;
+
+        swipeContainer.setColorSchemeResources(android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light);
         populateTimeline();
     }
 
     private void loadMoreTimeline(int lastIndex) {
         long lastId = tweets.get(lastIndex).getUid();
+        swipeContainer.setRefreshing(true);
         debug(String.valueOf(lastId));
         client.getHomeTimelineBefore(lastId, new JsonHttpResponseHandler() {
             @Override

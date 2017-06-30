@@ -1,13 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#262F42</color>
-    <color name="colorPrimaryDark">#1C2230</color>
-    <color name="colorAccent">#9197AE</color>
-    <color name="dark">#0F0F0F</color>
+    <color name="colorPrimary">#1da1f2</color>
+    <color name="colorPrimaryDark">#1576b3</color>
+    <color name="colorAccent">#9197ae</color>
+    <color name="dark">#0f0f0f</color>
     <color name="titles">#DDDDDD</color>
     <color name="overview">#AAAAAA</color>
     <color name="cursorAccent">#AAAAAA</color>
     <color name="controlActivated">#AAAAAA</color>
     <color name="controlNormal">#AAAAAA</color>
+    <color name="primary_text_material_light">#de050505</color>
+    <color name="background_material_light">#fbfbfb</color>
+    <color name="secondary_text_material_light">#dc666666</color>
+    <color name="favorited">#FF6666</color>
+    <color name="unfavorited">#999999</color>
+    <color name="reTweeted">#66FF66</color>
+    <color name="unReTweeted">#999999</color>
+
 
 </resources>

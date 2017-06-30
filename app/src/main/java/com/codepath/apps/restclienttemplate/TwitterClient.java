@@ -24,8 +24,8 @@ import com.loopj.android.http.RequestParams;
 public class TwitterClient extends OAuthBaseClient {
 	public static final BaseApi REST_API_INSTANCE = TwitterApi.instance(); // Change this
 	public static final String REST_URL = "https://api.twitter.com/1.1"; // Change this, base API URL
-	public static final String REST_CONSUMER_KEY = "pvRv7qlcqnscqWF6CohHi8X42"; //Resources.getSystem().getString(R.strings.api_key);       // Change this
-	public static final String REST_CONSUMER_SECRET = "3rPxxtieA7lwpDz4cv0f55JzqKmra5XBGsl799i14PzdBu0fwV"; // Change this
+	public static final String REST_CONSUMER_KEY = "mZl55zFawzqQ5RG3sJneNlA7N"; //Resources.getSystem().getString(R.strings.api_key);       // Change this
+	public static final String REST_CONSUMER_SECRET = "YaN7sQ6SsbULPiLPiF5TDqB8xIKmxuWAnBtPGMIxsf8msZIG8i"; // Change this
 
 	// Landing page to indicate the OAuth flow worked in case Chrome for Android 25+ blocks navigation back to the app.
 	public static final String FALLBACK_URL = "https://codepath.github.io/android-rest-client-template/success.html";
@@ -54,7 +54,7 @@ public class TwitterClient extends OAuthBaseClient {
 
     public void getHomeTimelineBefore(long Id, AsyncHttpResponseHandler handler) {
         String apiUrl = getApiUrl("statuses/home_timeline.json");
-        // Can specify query string params directly or through RequestParams.
+        // Can specify query string params directly or trehrough RequestParams.
         RequestParams params = new RequestParams();
         params.put("count", "25");
         params.put("max_id", Id);
@@ -109,6 +109,16 @@ public class TwitterClient extends OAuthBaseClient {
 		Log.d("TWITTERCLIENT", apiUrl);
 		// Can specify query string params directly or through RequestParams.
 		RequestParams params = new RequestParams();
+		client.post(apiUrl, params, handler);
+	}
+
+	public void getFollowersList(long userId, boolean skip, AsyncHttpResponseHandler handler) {
+		String apiUrl = getApiUrl("followers/list.json");
+		Log.d("TWITTERCLIENT", apiUrl);
+		// Can specify query string params directly or through RequestParams.
+		RequestParams params = new RequestParams();
+		params.put("user_id", userId);
+		params.put("skip_status", skip);
 		client.post(apiUrl, params, handler);
 	}
 

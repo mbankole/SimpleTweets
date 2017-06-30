@@ -9,8 +9,8 @@
         app:showAsAction="ifRoom"></item>
     <item
         android:id="@+id/miProfile"
-        android:icon="@android:drawable/ic_menu_myplaces"
-        android:title="Profile"
+        android:icon="@drawable/ic_vector_person_stroke"
         android:onClick="onProfileAction"
+        android:title="Profile"
         app:showAsAction="ifRoom|withText"></item>
 </menu>

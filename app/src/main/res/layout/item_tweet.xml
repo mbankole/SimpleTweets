@@ -25,18 +25,8 @@
         android:maxWidth="140dp"
         android:text="TextView"
         android:textSize="13sp"
+        android:textColor="@color/primary_text_material_light"
         tools:text="UserName" />
-
-    <TextView
-        android:id="@+id/tvBody"
-        android:layout_width="325dp"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/tvUserName"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
-        android:layout_toEndOf="@+id/ivProfileImage"
-        android:autoLink="all"
-        android:text="tweet body very very long" />
 
     <TextView
         android:id="@+id/tvScreenName"
@@ -48,7 +38,39 @@
         android:maxLines="1"
         android:maxWidth="100dp"
         android:text="%screenname"
+        android:textColor="@color/secondary_text_material_light"
         android:textSize="13sp" />
+
+    <TextView
+        android:id="@+id/tvReplying"
+        android:layout_marginLeft="5dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/ivProfileImage"
+        android:layout_below="@id/tvUserName"
+        android:maxLines="1"
+        android:text="Replying to " />
+
+    <TextView
+        android:id="@+id/tvReplyingScreenName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tvUserName"
+        android:layout_toEndOf="@id/tvReplying"
+        android:maxLines="1"
+        android:text="#name" />
+
+    <TextView
+        android:id="@+id/tvBody"
+        android:layout_width="325dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tvReplying"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:layout_toEndOf="@+id/ivProfileImage"
+        android:textSize="13sp"
+        android:textColor="@color/secondary_text_material_light"
+        android:text="tweet body very very long" />
 
     <TextView
         android:id="@+id/tvRelTime"
@@ -56,29 +78,38 @@
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
+        android:textColor="@color/secondary_text_material_light"
         android:text="18m"
         android:textSize="10sp" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentEnd="true"
+    <ImageView
+        android:id="@+id/ivTweetImage"
+        android:layout_width="240dp"
+        android:layout_height="wrap_content"
         android:layout_alignStart="@+id/tvBody"
         android:layout_below="@+id/tvBody"
+        android:layout_margin="5dp"
+        android:adjustViewBounds="false" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:gravity="center_horizontal|fill_horizontal"
         android:orientation="horizontal"
-        android:weightSum="1">
+        android:weightSum="1"
+        android:layout_below="@+id/ivTweetImage"
+        android:layout_alignStart="@+id/ivTweetImage">
 
         <Button
             android:id="@+id/btReply"
             style="@android:style/Widget.Button"
             android:layout_width="25dp"
             android:layout_height="25dp"
-            android:layout_below="@+id/tvBody"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
             android:layout_marginStart="10dp"
-            android:background="@android:drawable/ic_menu_revert"
-            android:onClick="onClick"
-            tools:layout_editor_absoluteX="4dp"
+            android:background="@drawable/vector_compose_dm_fab"
+            android:backgroundTint="@color/unfavorited"
             tools:layout_editor_absoluteY="1dp" />
 
         <Button
@@ -86,25 +117,42 @@
             android:layout_width="25dp"
             android:layout_height="25dp"
             android:layout_alignParentTop="true"
-            android:layout_alignStart="@+id/tvBody"
-            android:layout_marginStart="100dp"
+            android:layout_alignStart="@+id/btReply"
+            android:layout_marginStart="110dp"
             android:background="@drawable/ic_vector_retweet_stroke"
-            tools:layout_editor_absoluteX="135dp"
+            android:backgroundTint="@color/unfavorited"
             tools:layout_editor_absoluteY="1dp" />
+
+        <TextView
+            android:id="@+id/tvReTweets"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignStart="@id/btReTweet"
+            android:layout_marginStart="30dp"
+            android:layout_centerInParent="true"
+            android:textSize="12sp"
+            android:text="##" />
+
 
         <Button
             android:id="@+id/btFavorite"
             android:layout_width="25dp"
             android:layout_height="25dp"
-            android:layout_below="@+id/tvBody"
-            android:layout_marginStart="100dp"
-            android:layout_weight="0.05"
-            android:background="@drawable/ic_vector_heart_stroke"
-            app:layout_constraintLeft_toRightOf="@+id/btReTweet"
-            app:layout_constraintRight_toRightOf="parent"
+            android:layout_alignStart="@id/btReTweet"
+            android:layout_marginStart="110dp"
+            android:background="@drawable/ic_vector_heart"
+            android:backgroundTint="@color/unfavorited"
             tools:layout_editor_absoluteY="1dp" />
+        <TextView
+            android:id="@+id/tvFavorites"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignStart="@id/btFavorite"
+            android:layout_marginStart="30dp"
+            android:layout_centerInParent="true"
+            android:textSize="12sp"
+            android:text="##" />
 
-    </LinearLayout>
-
+    </RelativeLayout>
 
 </RelativeLayout>

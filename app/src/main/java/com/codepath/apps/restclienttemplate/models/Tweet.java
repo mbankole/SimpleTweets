@@ -18,7 +18,10 @@ public class Tweet implements Parcelable{
     public int reTweetCount;
     public int favoritesCount;
     public String inReplyToScreenname;
-    public boolean favorited;
+    public String tweetImageUrl;
+    public boolean favorited = false;
+    public boolean reTweeted = false;
+    public boolean isReply = false;
     // deserialze data
 
     public Tweet() {};
@@ -31,9 +34,17 @@ public class Tweet implements Parcelable{
         tweet.createdAt = obj.getString("created_at");
         tweet.reTweetCount = obj.getInt("retweet_count");
         tweet.inReplyToScreenname = obj.getString("in_reply_to_screen_name");
+        tweet.isReply = tweet.inReplyToScreenname != null;
         tweet.favorited = obj.getBoolean("favorited");
+        tweet.reTweeted = obj.getBoolean("retweeted");
         tweet.user = User.fromJSON(obj.getJSONObject("user"));
-        tweet.favoritesCount = 0;//obj.getInt("favorites_count");
+        tweet.favoritesCount = obj.getInt("favorite_count");
+        JSONObject entities = obj.getJSONObject("entities");
+        if (entities.has("media")) {
+            tweet.tweetImageUrl = entities.getJSONArray("media").optJSONObject(0).getString("media_url") + ":medium";
+        }
+        else tweet.tweetImageUrl = null;
+        //log.d("SHIT", obj.getJSONObject("entities").toString());
         return tweet;
     }
 
@@ -76,6 +87,11 @@ public class Tweet implements Parcelable{
                 ", uid=" + uid +
                 ", createdAt='" + createdAt + '\'' +
                 ", user=" + user +
+                ", reTweetCount=" + reTweetCount +
+                ", favoritesCount=" + favoritesCount +
+                ", inReplyToScreenname='" + inReplyToScreenname + '\'' +
+                ", tweetImageUrl='" + tweetImageUrl + '\'' +
+                ", favorited=" + favorited +
                 '}';
     }
 
@@ -93,7 +109,9 @@ public class Tweet implements Parcelable{
         dest.writeInt(this.reTweetCount);
         dest.writeInt(this.favoritesCount);
         dest.writeString(this.inReplyToScreenname);
+        dest.writeString(this.tweetImageUrl);
         dest.writeByte(this.favorited ? (byte) 1 : (byte) 0);
+        dest.writeByte(this.reTweeted ? (byte) 1 : (byte) 0);
     }
 
     protected Tweet(Parcel in) {
@@ -104,7 +122,9 @@ public class Tweet implements Parcelable{
         this.reTweetCount = in.readInt();
         this.favoritesCount = in.readInt();
         this.inReplyToScreenname = in.readString();
+        this.tweetImageUrl = in.readString();
         this.favorited = in.readByte() != 0;
+        this.reTweeted = in.readByte() != 0;
     }
 
     public static final Creator<Tweet> CREATOR = new Creator<Tweet>() {

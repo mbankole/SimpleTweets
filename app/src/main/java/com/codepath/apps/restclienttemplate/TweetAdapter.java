@@ -1,9 +1,9 @@
 package com.codepath.apps.restclienttemplate;
 
 import android.content.Context;
-import android.content.Intent;
-import android.support.design.widget.Snackbar;
+import android.content.res.ColorStateList;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
@@ -12,7 +12,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.codepath.apps.restclienttemplate.models.Tweet;
@@ -41,6 +40,8 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder>{
     Context context;
     ViewGroup mParent;
     FragmentManager fm;
+    SwipeRefreshLayout swipeContainer;
+
 
     String TAG = "TweetAdapter";
     // tweets array into the constructor
@@ -72,15 +73,43 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder>{
         //populate the views with the data
 
         holder.tvUsername.setText(tweet.user.name);
+        //log.d("TWEETIMAGE", tweet.tweetImageUrl);
         holder.tvBody.setText(tweet.body);
         String screenName = "@" + tweet.user.screenName;
         holder.tvScreenName.setText(screenName);
         holder.tvRelTime.setText(getRelativeTimeAgo(tweet.createdAt));
-        if (tweet.favorited) holder.btFavorite.setBackground(context.getResources().getDrawable(R.drawable.ic_vector_heart));
+        holder.tvReTweets.setText(String.valueOf(tweet.reTweetCount));
+        holder.tvFavorites.setText(String.valueOf(tweet.favoritesCount));
+        if (tweet.favorited) holder.btFavorite.setBackgroundTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.favorited)));
+        else holder.btFavorite.setBackgroundTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.unfavorited)));
+        if (tweet.reTweeted) holder.btReTweet.setBackgroundTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.reTweeted)));
+        else holder.btReTweet.setBackgroundTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.unReTweeted)));
+        if (!tweet.isReply) {
+            holder.tvReplying.setVisibility(View.VISIBLE);
+            holder.tvReplyToScreenName.setVisibility(View.VISIBLE);
+            holder.tvReplyToScreenName.setText(tweet.inReplyToScreenname);
+        } else {
+            holder.tvReplying.setVisibility(View.GONE);
+            holder.tvReplyToScreenName.setVisibility(View.GONE);
+        }
         Glide.with(context)
                 .load(tweet.user.profileImageUrl)
                 .bitmapTransform(new RoundedCornersTransformation(context, 5, 0))
                 .into(holder.ivProfileImage);
+        if (tweet.tweetImageUrl != null) {
+            holder.ivTweetImage.setVisibility(View.VISIBLE);
+            Glide.with(context)
+                    .load(tweet.tweetImageUrl)
+                    .fitCenter()
+                    .dontAnimate()
+                    .bitmapTransform(new RoundedCornersTransformation(context, 25, 0))
+                    //.override(600,600)
+                    //.fitCenter()
+                    .into(holder.ivTweetImage);
+        }
+        else {
+            holder.ivTweetImage.setVisibility(View.GONE);
+        }
     }
 
     //create Viewholder
@@ -90,9 +119,14 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder>{
         public TextView tvBody;
         public TextView tvScreenName;
         public TextView tvRelTime;
+        public TextView tvFavorites;
+        public TextView tvReTweets;
+        public TextView tvReplying;
+        public TextView tvReplyToScreenName;
         public Button btReply;
         public Button btFavorite;
         public Button btReTweet;
+        public ImageView ivTweetImage;
         private TwitterClient client;
 
         public ViewHolder(View itemView, Context con) {
@@ -101,10 +135,15 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder>{
             //perform the lookups
 
             ivProfileImage = (ImageView)itemView.findViewById(R.id.ivProfileImage);
+            ivTweetImage = (ImageView)itemView.findViewById(R.id.ivTweetImage);
             tvUsername = (TextView)itemView.findViewById(R.id.tvUserName);
             tvScreenName = (TextView)itemView.findViewById(R.id.tvScreenName);
             tvBody = (TextView)itemView.findViewById(R.id.tvBody);
             tvRelTime = (TextView)itemView.findViewById(R.id.tvRelTime);
+            tvFavorites = (TextView)itemView.findViewById(R.id.tvFavorites);
+            tvReTweets = (TextView)itemView.findViewById(R.id.tvReTweets);
+            tvReplying = (TextView)itemView.findViewById(R.id.tvReplying);
+            tvReplyToScreenName = (TextView)itemView.findViewById(R.id.tvReplyingScreenName);
             btReply = (Button)itemView.findViewById(R.id.btReply);
             btFavorite = (Button)itemView.findViewById(R.id.btFavorite);
             btReTweet = (Button)itemView.findViewById(R.id.btReTweet);
@@ -112,6 +151,7 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder>{
             btReply.setOnClickListener(this);
             btFavorite.setOnClickListener(this);
             btReTweet.setOnClickListener(this);
+            ivTweetImage.setOnClickListener(this);
             client = TwitterApp.getRestClient();
 
         }
@@ -119,18 +159,23 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder>{
         @Override
         public void onClick(View v) {
             // gets item position
-            int position = getAdapterPosition();
+            //final View view = v;
+            final int position = getAdapterPosition();
             if (position != RecyclerView.NO_POSITION) {
                 final Tweet tweet = mTweets.get(position);
                 if (v.getId() == btFavorite.getId()) {
-                    Snackbar.make(v, "Favorite", Snackbar.LENGTH_LONG).show();
+                    swipeContainer.setRefreshing(true);
                     if (!tweet.favorited)  {
                         client.favoriteTweet( tweet.uid,  new JsonHttpResponseHandler() {
                             @Override
                             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                                 debug("first on success");
-                                btFavorite.setBackground(context.getResources().getDrawable(R.drawable.ic_vector_heart));
+                                //Snackbar.make(view, "Favorite", Snackbar.LENGTH_LONG).show();
+                                btFavorite.setBackgroundTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.favorited)));
                                 tweet.favorited = true;
+                                tweet.favoritesCount += 1;
+                                notifyItemChanged(position);
+                                swipeContainer.setRefreshing(false);
                             }
 
                             @Override
@@ -165,8 +210,12 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder>{
                             @Override
                             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                                 debug("first on success");
-                                btFavorite.setBackground(context.getResources().getDrawable(R.drawable.ic_vector_heart_stroke));
+                                //Snackbar.make(view, "Un-Favorite", Snackbar.LENGTH_LONG).show();
+                                btFavorite.setBackgroundTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.unfavorited)));
                                 tweet.favorited = false;
+                                tweet.favoritesCount -= 1;
+                                notifyItemChanged(position);
+                                swipeContainer.setRefreshing(false);
                             }
 
                             @Override
@@ -196,42 +245,91 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder>{
                             }
                         });
                     }
+                    notifyItemChanged(position);
 
                 } else if (v.getId() == btReTweet.getId()) {
-                    Snackbar.make(v, "Retweet", Snackbar.LENGTH_LONG).show();
-                    client.reTweet( tweet.uid,  new JsonHttpResponseHandler() {
-                        @Override
-                        public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                            debug("first on success");
-                        }
+                    swipeContainer.setRefreshing(true);
+                    if (!tweet.reTweeted) {
+                        client.reTweet( tweet.uid,  new JsonHttpResponseHandler() {
+                            @Override
+                            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                                debug("first on success");
+                                //Snackbar.make(view, "Retweeted", Snackbar.LENGTH_LONG).show();
+                                btReTweet.setBackgroundTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.reTweeted)));
+                                tweet.reTweeted = true;
+                                tweet.reTweetCount += 1;
+                                notifyItemChanged(position);
+                                swipeContainer.setRefreshing(false);
+                            }
 
-                        @Override
-                        public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
-                            debug("second on success");
-                        }
+                            @Override
+                            public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
+                                debug("second on success");
+                            }
 
-                        @Override
-                        public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                            debug("error 1");
-                            log.d("TwitterClient", responseString);
-                            throwable.printStackTrace();
-                        }
+                            @Override
+                            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                                debug("error 1");
+                                log.d("TwitterClient", responseString);
+                                throwable.printStackTrace();
+                            }
 
-                        @Override
-                        public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-                            debug("error 2");
-                            log.d("TwitterClient", errorResponse.toString());
-                            throwable.printStackTrace();
-                        }
+                            @Override
+                            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                                debug("error 2");
+                                log.d("TwitterClient", errorResponse.toString());
+                                throwable.printStackTrace();
+                            }
 
-                        @Override
-                        public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
-                            debug("error 3");
-                            log.d("TwitterClient", errorResponse.toString());
-                            throwable.printStackTrace();
-                        }
-                    });
+                            @Override
+                            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
+                                debug("error 3");
+                                log.d("TwitterClient", errorResponse.toString());
+                                throwable.printStackTrace();
+                            }
+                        });
+                    }
+                    else {
+                        client.unReTweet( tweet.uid,  new JsonHttpResponseHandler() {
+                            @Override
+                            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                                debug("first on success");
+                                //Snackbar.make(view, "Un-Retweeted", Snackbar.LENGTH_LONG).show();
+                                btReTweet.setBackgroundTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.unReTweeted)));
+                                tweet.reTweeted = false;
+                                tweet.reTweetCount -= 1;
+                                notifyItemChanged(position);
+                                swipeContainer.setRefreshing(false);
+                            }
 
+                            @Override
+                            public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
+                                debug("second on success");
+                            }
+
+                            @Override
+                            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                                debug("error 1");
+                                log.d("TwitterClient", responseString);
+                                throwable.printStackTrace();
+                            }
+
+                            @Override
+                            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                                debug("error 2");
+                                log.d("TwitterClient", errorResponse.toString());
+                                throwable.printStackTrace();
+                            }
+
+                            @Override
+                            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
+                                debug("error 3");
+                                log.d("TwitterClient", errorResponse.toString());
+                                throwable.printStackTrace();
+                            }
+                        });
+                    }
+                    notifyItemChanged(position);
                 } else if (v.getId() == btReply.getId()) {
                     debug("clicked reply button");
                     ComposeTweetDialogFragment composeTweetDialogFragment =
@@ -239,16 +337,21 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder>{
                     composeTweetDialogFragment.show(fm, "fragment_edit_name");
                     return;
                 } else {
-                    Toast.makeText(context, "DETAIL", Toast.LENGTH_LONG).show();
                     // make sure the position is valid, i.e. actually exists in the view
                     // get the movie at the position, this won't work if the class is static
                     // create intent for the new activity
-                    Intent intent = new Intent(context, TweetDetailActivity.class);
+                    TweetDetailDialogFragment tweetDetailDialogFragment =
+                            TweetDetailDialogFragment.newInstance(tweet);
+                    tweetDetailDialogFragment.fm = fm;
+                    tweetDetailDialogFragment.viewHolder = this;
+                    tweetDetailDialogFragment.show(fm, "fragment_edit_name");
+                    return;
+                    //Intent intent = new Intent(context, TweetDetailActivity.class);
                     // serialize the movie using parceler, use its short name as a key
-                    intent.putExtra("tweet", tweet);
-                    intent.putExtra("user", tweet.user);
+                    //intent.putExtra("tweet", tweet);
+                    //intent.putExtra("user", tweet.user);
                     // show the activity
-                    context.startActivity(intent);
+                    //context.startActivity(intent);
                 }
             }
         }

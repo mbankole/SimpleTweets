@@ -16,7 +16,7 @@
             android:layout_height="75dp"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
-            app:srcCompat="@android:color/black" />
+            app:srcCompat="@android:color/black"/>
 
         <TextView
             android:id="@+id/tvUserName"
@@ -24,13 +24,14 @@
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_marginLeft="5dp"
+            android:layout_marginTop="9dp"
             android:layout_toEndOf="@+id/ivProfileImage"
             android:ellipsize="end"
             android:maxLines="1"
             android:text="TextView"
             android:textSize="20sp"
             android:textColor="@color/primary_text_material_light"
-            tools:text="UserName" />
+            tools:text="UserName"/>
 
         <TextView
             android:id="@+id/tvScreenName"
@@ -43,7 +44,7 @@
             android:maxLines="1"
             android:text="%screenname"
             android:textColor="@color/secondary_text_material_light"
-            android:textSize="18sp" />
+            android:textSize="18sp"/>
 
         <TextView
             android:id="@+id/tvReplying"
@@ -54,7 +55,7 @@
             android:layout_alignParentLeft="true"
             android:textSize="15sp"
         android:layout_below="@id/ivProfileImage"
-            android:text="Replying to " />
+            android:text="Replying to "/>
 
         <TextView
             android:id="@+id/tvReplyingScreenName"
@@ -65,20 +66,20 @@
             android:layout_toEndOf="@id/tvReplying"
             android:textSize="15sp"
         android:maxLines="1"
-            android:text="#name" />
+            android:text="#name"/>
 
         <TextView
             android:id="@+id/tvBody"
             android:layout_width="325dp"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
             android:layout_below="@+id/tvReplying"
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
-            android:layout_alignParentLeft="true"
-            android:textSize="15sp"
             android:autoLink="all"
+            android:text="tweet body very very long"
             android:textColor="@color/secondary_text_material_light"
-            android:text="tweet body very very long" />
+            android:textSize="15sp"/>
 
         <TextView
             android:id="@+id/tvRelTime"
@@ -88,16 +89,16 @@
             android:layout_alignParentTop="true"
             android:textColor="@color/secondary_text_material_light"
             android:text="18m"
-            android:textSize="14sp" />
+            android:textSize="12sp"/>
 
         <ImageView
             android:id="@+id/ivTweetImage"
-            android:layout_width="240dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignStart="@+id/tvBody"
+            android:layout_alignParentLeft="true"
             android:layout_below="@+id/tvBody"
             android:layout_margin="5dp"
-            android:adjustViewBounds="false" />
+            android:adjustViewBounds="false"/>
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -105,6 +106,7 @@
             android:gravity="center_horizontal|fill_horizontal"
             android:orientation="horizontal"
             android:weightSum="1"
+            android:layout_marginBottom="5dp"
             android:layout_alignParentBottom="true">
 
             <Button
@@ -117,7 +119,7 @@
                 android:layout_marginStart="10dp"
                 android:background="@drawable/vector_compose_dm_fab"
                 android:backgroundTint="@color/unfavorited"
-                tools:layout_editor_absoluteY="1dp" />
+                tools:layout_editor_absoluteY="1dp"/>
 
             <Button
                 android:id="@+id/btReTweet"
@@ -125,10 +127,10 @@
                 android:layout_height="25dp"
                 android:layout_alignParentTop="true"
                 android:layout_alignStart="@+id/btReply"
-                android:layout_marginStart="110dp"
+                android:layout_marginStart="115dp"
                 android:background="@drawable/ic_vector_retweet_stroke"
                 android:backgroundTint="@color/unfavorited"
-                tools:layout_editor_absoluteY="1dp" />
+                tools:layout_editor_absoluteY="1dp"/>
 
             <TextView
                 android:id="@+id/tvReTweets"
@@ -138,7 +140,7 @@
                 android:layout_marginStart="30dp"
                 android:layout_centerInParent="true"
                 android:textSize="12sp"
-                android:text="##" />
+                android:text="##"/>
 
 
             <Button
@@ -146,7 +148,7 @@
                 android:layout_width="25dp"
                 android:layout_height="25dp"
                 android:layout_alignStart="@id/btReTweet"
-                android:layout_marginStart="110dp"
+                android:layout_marginStart="115dp"
                 android:background="@drawable/ic_vector_heart"
                 android:backgroundTint="@color/unfavorited"
                 tools:layout_editor_absoluteY="1dp" />
@@ -158,8 +160,7 @@
                 android:layout_marginStart="30dp"
                 android:layout_centerInParent="true"
                 android:textSize="12sp"
-                android:text="##" />
-
+                android:text="##"/>
         </RelativeLayout>
     </RelativeLayout>
 </RelativeLayout>

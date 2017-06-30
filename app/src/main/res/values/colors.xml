@@ -14,7 +14,7 @@
     <color name="secondary_text_material_light">#dc666666</color>
     <color name="favorited">#FF6666</color>
     <color name="unfavorited">#999999</color>
-    <color name="reTweeted">#66FF66</color>
+    <color name="reTweeted">#33ee33</color>
     <color name="unReTweeted">#999999</color>
 
 

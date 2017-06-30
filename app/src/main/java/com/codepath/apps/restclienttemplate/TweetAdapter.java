@@ -377,7 +377,10 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder>{
         } catch (ParseException e) {
             e.printStackTrace();
         }
-
+        relativeDate = relativeDate.replace(" sec.", "s");
+        relativeDate = relativeDate.replace(" min.", "m");
+        relativeDate = relativeDate.replace(" hr.", "h");
+        relativeDate = relativeDate.replace(" ago", "");
         return relativeDate;
     }
 

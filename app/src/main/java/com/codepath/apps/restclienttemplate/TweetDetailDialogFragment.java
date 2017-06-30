@@ -103,19 +103,8 @@ public class TweetDetailDialogFragment extends DialogFragment implements View.On
         ivTweetImage.setOnClickListener(this);
         client = TwitterApp.getRestClient();
 
-        if (tweet.tweetImageUrl != null) {
-            Glide.with(context)
-                    .load(tweet.tweetImageUrl)
-                    .fitCenter()
-                    .dontAnimate()
-                    .bitmapTransform(new RoundedCornersTransformation(context, 25, 0))
-                    //.override(600,600)
-                    //.fitCenter()
-                    .into(ivTweetImage);
-        }
-
         tvUserName.setText(tweet.user.name);
-        //log.d("TWEETIMAGE", tweet.tweetImageUrl);
+        log.d("TWEETIMAGEDETAIL", tweet.tweetImageUrl);
         tvBody.setText(tweet.body);
         String screenName = "@" + tweet.user.screenName;
         tvScreenName.setText(screenName);
@@ -168,7 +157,9 @@ public class TweetDetailDialogFragment extends DialogFragment implements View.On
         } catch (ParseException e) {
             e.printStackTrace();
         }
-
+        relativeDate = relativeDate.replace(" sec.", "s");
+        relativeDate = relativeDate.replace(" min.", "m");
+        relativeDate = relativeDate.replace(" hr.", "h");
         return relativeDate;
     }
     public void debug(String message) {

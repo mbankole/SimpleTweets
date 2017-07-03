@@ -11,7 +11,8 @@
         android:layout_height="50dp"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        app:srcCompat="@android:color/black" />
+        app:srcCompat="@android:color/black"
+        android:contentDescription="profile image" />
 
     <TextView
         android:id="@+id/tvUserName"
@@ -23,19 +24,32 @@
         android:ellipsize="end"
         android:maxLines="1"
         android:maxWidth="140dp"
-        android:text="TextView"
+        android:text="Username"
         android:textSize="13sp"
-        android:textColor="@color/primary_text_material_light"
-        tools:text="UserName" />
+        android:textStyle="bold"
+        android:textColor="@color/primary_text_material_light" />
+
+    <ImageView
+        android:id="@+id/ivVerified"
+        android:layout_width="12dp"
+        android:layout_height="12dp"
+        android:layout_alignTop="@id/tvUserName"
+        android:layout_toEndOf="@+id/tvUserName"
+        android:layout_marginTop="4dp"
+        android:layout_marginStart="2dp"
+        android:tint="@color/colorPrimary"
+        app:srcCompat="@drawable/ic_verification_symbol"
+        android:contentDescription="verified image" />
 
     <TextView
         android:id="@+id/tvScreenName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_toEndOf="@+id/tvUserName"
+        android:layout_toEndOf="@+id/ivVerified"
         android:ellipsize="end"
         android:maxLines="1"
+        android:layout_marginLeft="2dp"
         android:maxWidth="100dp"
         android:text="%screenname"
         android:textColor="@color/secondary_text_material_light"
@@ -89,7 +103,8 @@
         android:layout_alignStart="@+id/tvBody"
         android:layout_below="@+id/tvBody"
         android:layout_margin="5dp"
-        android:adjustViewBounds="false" />
+        android:adjustViewBounds="false"
+        android:contentDescription="image attached to tweet" />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -98,6 +113,7 @@
         android:orientation="horizontal"
         android:weightSum="1"
         android:layout_below="@+id/ivTweetImage"
+        android:layout_marginTop="3dp"
         android:layout_alignStart="@+id/ivTweetImage">
 
         <Button

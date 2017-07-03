@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
 import android.text.format.DateUtils;
@@ -32,11 +33,12 @@ import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 import static com.loopj.android.http.AsyncHttpClient.log;
 
 /**
- * Created by mbankole on 6/29/17.
+ * Created by mbankole on 6/29/17
  */
 
 public class TweetDetailDialogFragment extends DialogFragment implements View.OnClickListener{
     public ImageView ivProfileImage;
+    public ImageView ivVerified;
     public TextView tvUserName;
     public TextView tvBody;
     public TextView tvScreenName;
@@ -49,8 +51,9 @@ public class TweetDetailDialogFragment extends DialogFragment implements View.On
     public Button btFavorite;
     public Button btReTweet;
     public ImageView ivTweetImage;
-    TweetAdapter.ViewHolder viewHolder;
-    FragmentManager fm;
+    int position;
+    TweetAdapter tweetAdapter;
+    FragmentManager fragmentManager;
     Context context;
     Tweet tweet;
     private TwitterClient client;
@@ -93,6 +96,7 @@ public class TweetDetailDialogFragment extends DialogFragment implements View.On
         tvReplyToScreenName = (TextView)view.findViewById(R.id.tvReplyingScreenName);
         tvBody = (TextView)view.findViewById(R.id.tvBody);
         ivProfileImage = (ImageView)view.findViewById(R.id.ivProfileImage);
+        ivVerified = (ImageView)view.findViewById(R.id.ivVerified);
         btFavorite = (Button)view.findViewById(R.id.btFavorite);
         btReTweet = (Button)view.findViewById(R.id.btReTweet);
         btReply = (Button)view.findViewById(R.id.btReply);
@@ -100,7 +104,6 @@ public class TweetDetailDialogFragment extends DialogFragment implements View.On
         btReply.setOnClickListener(this);
         btFavorite.setOnClickListener(this);
         btReTweet.setOnClickListener(this);
-        ivTweetImage.setOnClickListener(this);
         client = TwitterApp.getRestClient();
 
         tvUserName.setText(tweet.user.name);
@@ -115,6 +118,8 @@ public class TweetDetailDialogFragment extends DialogFragment implements View.On
         else btFavorite.setBackgroundTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.unfavorited)));
         if (tweet.reTweeted) btReTweet.setBackgroundTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.reTweeted)));
         else btReTweet.setBackgroundTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.unReTweeted)));
+        if (tweet.user.verified) ivVerified.setVisibility(View.VISIBLE);
+        else ivVerified.setVisibility(View.GONE);
         if (!tweet.isReply) {
             tvReplying.setVisibility(View.VISIBLE);
             tvReplyToScreenName.setVisibility(View.VISIBLE);
@@ -162,6 +167,7 @@ public class TweetDetailDialogFragment extends DialogFragment implements View.On
         relativeDate = relativeDate.replace(" hr.", "h");
         return relativeDate;
     }
+
     public void debug(String message) {
         log.d(TAG, message);
     }
@@ -169,7 +175,8 @@ public class TweetDetailDialogFragment extends DialogFragment implements View.On
     @Override
     public void onClick(View v) {
         // gets item position
-        //final View view = v;
+        final View view = v;
+        debug("Position in fragment - " + String.valueOf(position));
             final Tweet mTweet = tweet;
             if (v.getId() == btFavorite.getId()) {
                 //swipeContainer.setRefreshing(true);
@@ -178,11 +185,11 @@ public class TweetDetailDialogFragment extends DialogFragment implements View.On
                         @Override
                         public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                             debug("first on success");
-                            //Snackbar.make(view, "Favorite", Snackbar.LENGTH_LONG).show();
+                            Snackbar.make(view, "Favorite", Snackbar.LENGTH_SHORT).show();
                             btFavorite.setBackgroundTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.favorited)));
                             tweet.favorited = true;
                             tweet.favoritesCount += 1;
-                            //notifyItemChanged(position);
+                            tweetAdapter.notifyItemChanged(position);
                             //swipeContainer.setRefreshing(false);
                         }
 
@@ -218,11 +225,11 @@ public class TweetDetailDialogFragment extends DialogFragment implements View.On
                         @Override
                         public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                             debug("first on success");
-                            //Snackbar.make(view, "Un-Favorite", Snackbar.LENGTH_LONG).show();
+                            Snackbar.make(view, "Un-Favorite", Snackbar.LENGTH_SHORT).show();
                             btFavorite.setBackgroundTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.unfavorited)));
                             tweet.favorited = false;
                             tweet.favoritesCount -= 1;
-                            //notifyItemChanged(position);
+                            tweetAdapter.notifyItemChanged(position);
                             //swipeContainer.setRefreshing(false);
                         }
 
@@ -262,11 +269,11 @@ public class TweetDetailDialogFragment extends DialogFragment implements View.On
                         @Override
                         public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                             debug("first on success");
-                            //Snackbar.make(view, "Retweeted", Snackbar.LENGTH_LONG).show();
+                            Snackbar.make(view, "Retweeted", Snackbar.LENGTH_SHORT).show();
                             btReTweet.setBackgroundTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.reTweeted)));
                             tweet.reTweeted = true;
                             tweet.reTweetCount += 1;
-                            //notifyItemChanged(position);
+                            tweetAdapter.notifyItemChanged(position);
                             //swipeContainer.setRefreshing(false);
                         }
 
@@ -302,11 +309,11 @@ public class TweetDetailDialogFragment extends DialogFragment implements View.On
                         @Override
                         public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                             debug("first on success");
-                            //Snackbar.make(view, "Un-Retweeted", Snackbar.LENGTH_LONG).show();
+                            Snackbar.make(view, "Un-Retweeted", Snackbar.LENGTH_SHORT).show();
                             btReTweet.setBackgroundTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.unReTweeted)));
                             tweet.reTweeted = false;
                             tweet.reTweetCount -= 1;
-                            //notifyItemChanged(position);
+                            tweetAdapter.notifyItemChanged(position);
                             //swipeContainer.setRefreshing(false);
                         }
 
@@ -337,30 +344,18 @@ public class TweetDetailDialogFragment extends DialogFragment implements View.On
                         }
                     });
                 }
-                //notifyItemChanged(position);
 
             } else if (v.getId() == btReply.getId()) {
                 debug("clicked reply button");
                 dismiss();
                 ComposeTweetDialogFragment composeTweetDialogFragment =
                         ComposeTweetDialogFragment.newInstance("Replying to " + tweet.user.name, tweet.user.screenName, tweet.uid);
-                composeTweetDialogFragment.show(fm, "fragment_edit_name");
-                return;
+                composeTweetDialogFragment.show(fragmentManager, "fragment_edit_name");
             } else {
                 Toast.makeText(context, "DETAIL", Toast.LENGTH_LONG).show();
-                // make sure the position is valid, i.e. actually exists in the view
-                // get the movie at the position, this won't work if the class is static
-                // create intent for the new activity
                 TweetDetailDialogFragment tweetDetailDialogFragment =
                         TweetDetailDialogFragment.newInstance(tweet);
-                tweetDetailDialogFragment.show(fm, "fragment_edit_name");
-                return;
-                //Intent intent = new Intent(context, TweetDetailActivity.class);
-                // serialize the movie using parceler, use its short name as a key
-                //intent.putExtra("tweet", tweet);
-                //intent.putExtra("user", tweet.user);
-                // show the activity
-                //context.startActivity(intent);
+                tweetDetailDialogFragment.show(fragmentManager, "fragment_edit_name");
             }
         }
     }

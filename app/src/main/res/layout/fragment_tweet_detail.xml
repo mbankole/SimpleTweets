@@ -30,8 +30,21 @@
             android:maxLines="1"
             android:text="TextView"
             android:textSize="20sp"
+            android:textStyle="bold"
             android:textColor="@color/primary_text_material_light"
             tools:text="UserName"/>
+
+        <ImageView
+            android:id="@+id/ivVerified"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:layout_alignTop="@id/tvUserName"
+            android:layout_toEndOf="@+id/tvUserName"
+            android:layout_marginTop="6dp"
+            android:layout_marginStart="5dp"
+            android:tint="@color/colorPrimary"
+            app:srcCompat="@drawable/ic_verification_symbol"
+            android:contentDescription="verified image" />
 
         <TextView
             android:id="@+id/tvScreenName"
@@ -127,7 +140,7 @@
                 android:layout_height="25dp"
                 android:layout_alignParentTop="true"
                 android:layout_alignStart="@+id/btReply"
-                android:layout_marginStart="115dp"
+                android:layout_marginStart="110dp"
                 android:background="@drawable/ic_vector_retweet_stroke"
                 android:backgroundTint="@color/unfavorited"
                 tools:layout_editor_absoluteY="1dp"/>
@@ -148,7 +161,7 @@
                 android:layout_width="25dp"
                 android:layout_height="25dp"
                 android:layout_alignStart="@id/btReTweet"
-                android:layout_marginStart="115dp"
+                android:layout_marginStart="110dp"
                 android:background="@drawable/ic_vector_heart"
                 android:backgroundTint="@color/unfavorited"
                 tools:layout_editor_absoluteY="1dp" />

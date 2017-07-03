@@ -39,8 +39,6 @@ public class TimelineActivity extends AppCompatActivity implements ComposeTweetD
     private SwipeRefreshLayout swipeContainer;
 
 
-    private final int REQUEST_CODE = 20;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         debug("loaded up");
@@ -58,8 +56,6 @@ public class TimelineActivity extends AppCompatActivity implements ComposeTweetD
         tweets = new ArrayList<>();
         //construct the adapter
         tweetAdapter = new TweetAdapter(tweets);
-
-
 
         //recyclerview setup
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
@@ -204,10 +200,10 @@ public class TimelineActivity extends AppCompatActivity implements ComposeTweetD
 
     public void onProfileAction(MenuItem mi) {
         Toast.makeText(this, "PROFILE", Toast.LENGTH_LONG).show();
-        showEditDialog();
+        showUser();
     }
 
-    @Override
+    /*@Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // REQUEST_CODE is defined above
         if (resultCode == RESULT_OK && requestCode == REQUEST_CODE) {
@@ -218,7 +214,7 @@ public class TimelineActivity extends AppCompatActivity implements ComposeTweetD
             tweetAdapter.notifyItemInserted(0);
             rvTweets.smoothScrollToPosition(0);
         }
-    }
+    }*/
 
     private void sendTweet(String message) {
         client.sendTweet( message, new JsonHttpResponseHandler() {
@@ -277,6 +273,52 @@ public class TimelineActivity extends AppCompatActivity implements ComposeTweetD
         composeTweetDialogFragment.show(fm, "fragment_edit_name");
     }
 
+    private  void showUser() {
+        swipeContainer.setRefreshing(true);
+        client.getUserInfo(new JsonHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                log.d("TwitterClient", response.toString());
+                try {
+                    User user = User.fromJSON(response);
+                    swipeContainer.setRefreshing(false);
+                    Intent i = new Intent(TimelineActivity.this, UserPageActivity.class);
+                    i.putExtra("user", user);
+                    startActivity(i);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    swipeContainer.setRefreshing(false);
+                }
+            }
+
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
+                log.d("TwitterClient", response.toString());
+                swipeContainer.setRefreshing(false);
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                log.d("TwitterClient", responseString);
+                throwable.printStackTrace();
+                swipeContainer.setRefreshing(false);
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                log.d("TwitterClient", errorResponse.toString());
+                throwable.printStackTrace();
+                swipeContainer.setRefreshing(false);
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
+                log.d("TwitterClient", errorResponse.toString());
+                throwable.printStackTrace();
+                swipeContainer.setRefreshing(false);
+            }
+        });
+    }
 
     public void debug(String message) {
         log.d(TAG, message);

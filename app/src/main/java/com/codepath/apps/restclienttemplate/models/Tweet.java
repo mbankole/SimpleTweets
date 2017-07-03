@@ -33,8 +33,8 @@ public class Tweet implements Parcelable{
         tweet.uid = obj.getLong("id");
         tweet.createdAt = obj.getString("created_at");
         tweet.reTweetCount = obj.getInt("retweet_count");
-        tweet.inReplyToScreenname = obj.getString("in_reply_to_screen_name");
-        tweet.isReply = tweet.inReplyToScreenname != null;
+        tweet.inReplyToScreenname = obj.optString("in_reply_to_screen_name", null);
+        tweet.isReply = (tweet.inReplyToScreenname != null);
         tweet.favorited = obj.getBoolean("favorited");
         tweet.reTweeted = obj.getBoolean("retweeted");
         tweet.user = User.fromJSON(obj.getJSONObject("user"));

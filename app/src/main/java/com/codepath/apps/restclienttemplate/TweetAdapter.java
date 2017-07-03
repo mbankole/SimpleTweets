@@ -1,6 +1,7 @@
 package com.codepath.apps.restclienttemplate;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -84,7 +85,9 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder>{
         else holder.btFavorite.setBackgroundTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.unfavorited)));
         if (tweet.reTweeted) holder.btReTweet.setBackgroundTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.reTweeted)));
         else holder.btReTweet.setBackgroundTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.unReTweeted)));
-        if (!tweet.isReply) {
+        if (tweet.user.verified) holder.ivVerified.setVisibility(View.VISIBLE);
+        else holder.ivVerified.setVisibility(View.GONE);
+        if (tweet.isReply) {
             holder.tvReplying.setVisibility(View.VISIBLE);
             holder.tvReplyToScreenName.setVisibility(View.VISIBLE);
             holder.tvReplyToScreenName.setText(tweet.inReplyToScreenname);
@@ -115,6 +118,7 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder>{
     //create Viewholder
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         public ImageView ivProfileImage;
+        public ImageView ivVerified;
         public TextView tvUsername;
         public TextView tvBody;
         public TextView tvScreenName;
@@ -127,6 +131,7 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder>{
         public Button btFavorite;
         public Button btReTweet;
         public ImageView ivTweetImage;
+        TweetAdapter tw;
         private TwitterClient client;
 
         public ViewHolder(View itemView, Context con) {
@@ -136,6 +141,7 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder>{
 
             ivProfileImage = (ImageView)itemView.findViewById(R.id.ivProfileImage);
             ivTweetImage = (ImageView)itemView.findViewById(R.id.ivTweetImage);
+            ivVerified = (ImageView)itemView.findViewById(R.id.ivVerified);
             tvUsername = (TextView)itemView.findViewById(R.id.tvUserName);
             tvScreenName = (TextView)itemView.findViewById(R.id.tvScreenName);
             tvBody = (TextView)itemView.findViewById(R.id.tvBody);
@@ -152,6 +158,7 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder>{
             btFavorite.setOnClickListener(this);
             btReTweet.setOnClickListener(this);
             ivTweetImage.setOnClickListener(this);
+            ivProfileImage.setOnClickListener(this);
             client = TwitterApp.getRestClient();
 
         }
@@ -160,7 +167,8 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder>{
         public void onClick(View v) {
             // gets item position
             //final View view = v;
-            final int position = getAdapterPosition();
+            final Integer position = new Integer(getAdapterPosition());
+            debug("Position in adapter - " + String.valueOf(position));
             if (position != RecyclerView.NO_POSITION) {
                 final Tweet tweet = mTweets.get(position);
                 if (v.getId() == btFavorite.getId()) {
@@ -335,23 +343,19 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder>{
                     ComposeTweetDialogFragment composeTweetDialogFragment =
                             ComposeTweetDialogFragment.newInstance("Replying to " + tweet.user.name, tweet.user.screenName, tweet.uid);
                     composeTweetDialogFragment.show(fm, "fragment_edit_name");
-                    return;
-                } else {
-                    // make sure the position is valid, i.e. actually exists in the view
-                    // get the movie at the position, this won't work if the class is static
-                    // create intent for the new activity
+                } else if (v.getId() == ivProfileImage.getId()) { {
+                    Intent i = new Intent(context, UserPageActivity.class);
+                    i.putExtra("user", tweet.user);
+                    context.startActivity(i);
+                }
+                }
+                else {
                     TweetDetailDialogFragment tweetDetailDialogFragment =
                             TweetDetailDialogFragment.newInstance(tweet);
-                    tweetDetailDialogFragment.fm = fm;
-                    tweetDetailDialogFragment.viewHolder = this;
+                    tweetDetailDialogFragment.fragmentManager = fm;
+                    tweetDetailDialogFragment.tweetAdapter = (TweetAdapter)((RecyclerView)itemView.getParent()).getAdapter();
+                    tweetDetailDialogFragment.position = getAdapterPosition();
                     tweetDetailDialogFragment.show(fm, "fragment_edit_name");
-                    return;
-                    //Intent intent = new Intent(context, TweetDetailActivity.class);
-                    // serialize the movie using parceler, use its short name as a key
-                    //intent.putExtra("tweet", tweet);
-                    //intent.putExtra("user", tweet.user);
-                    // show the activity
-                    //context.startActivity(intent);
                 }
             }
         }

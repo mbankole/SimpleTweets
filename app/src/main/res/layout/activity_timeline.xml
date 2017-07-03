@@ -21,6 +21,29 @@
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
         android:layout_alignParentEnd="true"></android.support.v7.widget.Toolbar>
 
+    <android.support.design.widget.TabLayout
+        android:id="@+id/sliding_tabs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:tabMode="fixed"
+        android:layout_below="@+id/toolbar"
+        android:layout_alignParentStart="true" />
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/viewpager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:layout_below="@id/sliding_tabs"
+        android:background="@android:color/white" />
+
+    <!--<fragment
+        android:id="@+id/tweetsListFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        class="com.codepath.apps.restclienttemplate.fragments.TweetListFragment"
+        android:layout_below="@+id/toolbar" />
+
     <android.support.v4.widget.SwipeRefreshLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/swipeContainer"
@@ -48,7 +71,7 @@
 
 
 
-
+    -->
 
 
 </RelativeLayout>

@@ -1,14 +1,12 @@
 package com.codepath.apps.restclienttemplate;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.DividerItemDecoration;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -37,6 +35,7 @@ public class TimelineActivity extends AppCompatActivity implements ComposeTweetD
     ArrayList<Tweet> tweets;
     RecyclerView rvTweets;
     private SwipeRefreshLayout swipeContainer;
+    TweetFragmentPagerAdapter fragmentPager;
 
 
     @Override
@@ -44,11 +43,20 @@ public class TimelineActivity extends AppCompatActivity implements ComposeTweetD
         debug("loaded up");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_timeline);
+
+        ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
+        fragmentPager = new TweetFragmentPagerAdapter(getSupportFragmentManager(),
+                TimelineActivity.this);
+        viewPager.setAdapter(fragmentPager);
+
+        // Give the TabLayout the ViewPager
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.sliding_tabs);
+        tabLayout.setupWithViewPager(viewPager);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-
         setSupportActionBar(toolbar);
-
         client = TwitterApp.getRestClient();
+        /*
         final Context context = this;
         //find the recyclerview
         rvTweets = (RecyclerView)findViewById(R.id.rvTweet);
@@ -95,7 +103,7 @@ public class TimelineActivity extends AppCompatActivity implements ComposeTweetD
                 android.R.color.holo_green_light,
                 android.R.color.holo_orange_light,
                 android.R.color.holo_red_light);
-        populateTimeline();
+        populateTimeline();*/
     }
 
     private void loadMoreTimeline(int lastIndex) {
@@ -274,48 +282,48 @@ public class TimelineActivity extends AppCompatActivity implements ComposeTweetD
     }
 
     private  void showUser() {
-        swipeContainer.setRefreshing(true);
+        //swipeContainer.setRefreshing(true);
         client.getUserInfo(new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 log.d("TwitterClient", response.toString());
                 try {
                     User user = User.fromJSON(response);
-                    swipeContainer.setRefreshing(false);
+                    //swipeContainer.setRefreshing(false);
                     Intent i = new Intent(TimelineActivity.this, UserPageActivity.class);
                     i.putExtra("user", user);
                     startActivity(i);
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    swipeContainer.setRefreshing(false);
+                    //swipeContainer.setRefreshing(false);
                 }
             }
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
                 log.d("TwitterClient", response.toString());
-                swipeContainer.setRefreshing(false);
+                //swipeContainer.setRefreshing(false);
             }
 
             @Override
             public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
                 log.d("TwitterClient", responseString);
                 throwable.printStackTrace();
-                swipeContainer.setRefreshing(false);
+                //swipeContainer.setRefreshing(false);
             }
 
             @Override
             public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
                 log.d("TwitterClient", errorResponse.toString());
                 throwable.printStackTrace();
-                swipeContainer.setRefreshing(false);
+                //swipeContainer.setRefreshing(false);
             }
 
             @Override
             public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
                 log.d("TwitterClient", errorResponse.toString());
                 throwable.printStackTrace();
-                swipeContainer.setRefreshing(false);
+                //swipeContainer.setRefreshing(false);
             }
         });
     }
@@ -327,8 +335,9 @@ public class TimelineActivity extends AppCompatActivity implements ComposeTweetD
     @Override
     public void onFinishEditTweet(Tweet tweet) {
         debug("got tweet " + tweet.toString());
-        tweets.add(0, tweet);
-        tweetAdapter.notifyItemInserted(0);
-        rvTweets.smoothScrollToPosition(0);
+        fragmentPager.tweetListFragment.addTweet(tweet);
+        //tweets.add(0, tweet);
+        //tweetAdapter.notifyItemInserted(0);
+        //rvTweets.smoothScrollToPosition(0);
     }
 }

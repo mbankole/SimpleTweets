@@ -87,7 +87,7 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder>{
         else holder.btReTweet.setBackgroundTintList(ColorStateList.valueOf(context.getResources().getColor(R.color.unReTweeted)));
         if (tweet.user.verified) holder.ivVerified.setVisibility(View.VISIBLE);
         else holder.ivVerified.setVisibility(View.GONE);
-        if (tweet.isReply) {
+        if (tweet.isReply && !tweet.inReplyToScreenname.equals("null")) {
             holder.tvReplying.setVisibility(View.VISIBLE);
             holder.tvReplyToScreenName.setVisibility(View.VISIBLE);
             holder.tvReplyToScreenName.setText(tweet.inReplyToScreenname);
@@ -113,6 +113,30 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder>{
         else {
             holder.ivTweetImage.setVisibility(View.GONE);
         }
+    }
+
+    public void setmTweets(List<Tweet> mTweets) {
+        this.mTweets = mTweets;
+    }
+
+    public void setContext(Context context) {
+        this.context = context;
+    }
+
+    public void setmParent(ViewGroup mParent) {
+        this.mParent = mParent;
+    }
+
+    public void setFm(FragmentManager fm) {
+        this.fm = fm;
+    }
+
+    public void setSwipeContainer(SwipeRefreshLayout swipeContainer) {
+        this.swipeContainer = swipeContainer;
+    }
+
+    public void setTAG(String TAG) {
+        this.TAG = TAG;
     }
 
     //create Viewholder

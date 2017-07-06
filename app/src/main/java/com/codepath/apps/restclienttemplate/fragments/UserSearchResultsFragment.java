@@ -16,10 +16,10 @@ import android.view.ViewGroup;
 
 import com.codepath.apps.restclienttemplate.EndlessRecyclerViewScrollListener;
 import com.codepath.apps.restclienttemplate.R;
-import com.codepath.apps.restclienttemplate.TweetAdapter;
 import com.codepath.apps.restclienttemplate.TwitterApp;
 import com.codepath.apps.restclienttemplate.TwitterClient;
-import com.codepath.apps.restclienttemplate.models.Tweet;
+import com.codepath.apps.restclienttemplate.UserAdapter;
+import com.codepath.apps.restclienttemplate.models.User;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
 import org.json.JSONArray;
@@ -33,23 +33,25 @@ import cz.msebera.android.httpclient.Header;
 import static com.loopj.android.http.AsyncHttpClient.log;
 
 /**
- * Created by mbankole on 7/3/17.
+ * Created by mbankole on 7/5/17.
  */
 
-public class TweetListFragment extends Fragment{
+public class UserSearchResultsFragment extends Fragment {
     private TwitterClient client;
     private String TAG = "TimelineActivityStuff";
-    private TweetAdapter tweetAdapter;
-    ArrayList<Tweet> tweets;
-    RecyclerView rvTweets;
+    private UserAdapter usersAdapter;
+    ArrayList<User> users;
+    RecyclerView rvUsers;
     private SwipeRefreshLayout swipeContainer;
     FragmentManager fm;
+    String query;
 
-    public TweetListFragment() {}
+    public UserSearchResultsFragment() {}
 
-    public static TweetListFragment newInstance() {
-        TweetListFragment frag = new TweetListFragment();
+    public static UserSearchResultsFragment newInstance(String query) {
+        UserSearchResultsFragment frag = new UserSearchResultsFragment();
         Bundle args = new Bundle();
+        args.putString("query", query);
         frag.setArguments(args);
         return frag;
     }
@@ -60,33 +62,36 @@ public class TweetListFragment extends Fragment{
 
     public void setFm(FragmentManager fm) {
         this.fm = fm;
+
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_tweet_list, container, false);
-        client = TwitterApp.getRestClient();
-        //find the recyclerview
-        rvTweets = (RecyclerView)v.findViewById(R.id.rvTweet);
-        //init the arraylist
-        tweets = new ArrayList<>();
-        //construct the adapter
-        tweetAdapter = new TweetAdapter(tweets);
-        tweetAdapter.setFm(fm);
-        return v;
+        return inflater.inflate(R.layout.fragment_tweet_list, container, false);
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+
+        client = TwitterApp.getRestClient();
+        //find the recyclerview
+        rvUsers = (RecyclerView)view.findViewById(R.id.rvTweet);
+        //init the arraylist
+        users = new ArrayList<>();
+        //construct the adapter
+        usersAdapter = new UserAdapter(users);
+        //usersAdapter.setFm(fm);
+
+        query = getArguments().getString("query");
         debug("loaded up");
         super.onCreate(savedInstanceState);
         final Context context = getContext();
 
         //recyclerview setup
         LinearLayoutManager layoutManager = new LinearLayoutManager(context);
-        rvTweets.setLayoutManager(layoutManager);
-        rvTweets.setAdapter(tweetAdapter);
+        rvUsers.setLayoutManager(layoutManager);
+        rvUsers.setAdapter(usersAdapter);
         EndlessRecyclerViewScrollListener scroller = new EndlessRecyclerViewScrollListener(layoutManager) {
             @Override
             public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
@@ -94,11 +99,11 @@ public class TweetListFragment extends Fragment{
                 loadMoreTimeline(totalItemsCount - 1);
             }
         };
-        rvTweets.addOnScrollListener(scroller);
+        rvUsers.addOnScrollListener(scroller);
 
-        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(rvTweets.getContext(),
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(rvUsers.getContext(),
                 Configuration.ORIENTATION_PORTRAIT);
-        rvTweets.addItemDecoration(dividerItemDecoration);
+        rvUsers.addItemDecoration(dividerItemDecoration);
 
         swipeContainer = (SwipeRefreshLayout) view.findViewById(R.id.swipeContainer);
         // Setup refresh listener which triggers new data loading
@@ -108,13 +113,13 @@ public class TweetListFragment extends Fragment{
                 // Your code to refresh the list here.
                 // Make sure you call swipeContainer.setRefreshing(false)
                 // once the network request has completed successfully.
-                tweetAdapter.clear();
+                usersAdapter.clear();
                 populateTimeline();
             }
         });
 
         //jank shit
-        tweetAdapter.setSwipeContainer(swipeContainer);
+        //usersAdapter.setSwipeContainer(swipeContainer);
 
         swipeContainer.setColorSchemeResources(android.R.color.holo_blue_bright,
                 android.R.color.holo_green_light,
@@ -124,10 +129,10 @@ public class TweetListFragment extends Fragment{
     }
 
     private void loadMoreTimeline(int lastIndex) {
-        long lastId = tweets.get(lastIndex).getUid();
+        long lastId = users.get(lastIndex).uid;
         swipeContainer.setRefreshing(true);
         debug(String.valueOf(lastId));
-        client.getHomeTimelineBefore(lastId, new JsonHttpResponseHandler() {
+        client.searchUsersBefore(lastId, query, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 log.d("TwitterClient", response.toString());
@@ -138,9 +143,9 @@ public class TweetListFragment extends Fragment{
                 log.d("TwitterClient", response.toString());
                 for (int i = 0; i < response.length(); i++) {
                     try {
-                        Tweet tweet = Tweet.fromJSON(response.getJSONObject(i));
-                        tweets.add(tweet);
-                        tweetAdapter.notifyItemInserted(tweets.size() - 1);
+                        User user = User.fromJSON(response.getJSONObject(i));
+                        users.add(user);
+                        usersAdapter.notifyItemInserted(users.size() - 1);
                         swipeContainer.setRefreshing(false);
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -172,7 +177,7 @@ public class TweetListFragment extends Fragment{
     private void populateTimeline() {
         swipeContainer.setRefreshing(true);
 
-        client.getHomeTimeline( new JsonHttpResponseHandler() {
+        client.searchUsers(query, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 log.d("TwitterClient", response.toString());
@@ -183,9 +188,9 @@ public class TweetListFragment extends Fragment{
                 log.d("TwitterClient", response.toString());
                 for (int i = 0; i < response.length(); i++) {
                     try {
-                        Tweet tweet = Tweet.fromJSON(response.getJSONObject(i));
-                        tweets.add(tweet);
-                        tweetAdapter.notifyItemInserted(tweets.size() - 1);
+                        User user = User.fromJSON(response.getJSONObject(i));
+                        users.add(user);
+                        usersAdapter.notifyItemInserted(users.size() - 1);
                         swipeContainer.setRefreshing(false);
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -217,10 +222,11 @@ public class TweetListFragment extends Fragment{
         log.d(TAG, message);
     }
 
+    /*
     public void addTweet(Tweet tweet) {
         debug("got tweet " + tweet.toString());
-        tweets.add(0, tweet);
+        user.add(0, tweet);
         tweetAdapter.notifyItemInserted(0);
         rvTweets.smoothScrollToPosition(0);
-    }
+    }*/
 }

@@ -16,10 +16,10 @@ import android.view.ViewGroup;
 
 import com.codepath.apps.restclienttemplate.EndlessRecyclerViewScrollListener;
 import com.codepath.apps.restclienttemplate.R;
-import com.codepath.apps.restclienttemplate.TweetAdapter;
 import com.codepath.apps.restclienttemplate.TwitterApp;
 import com.codepath.apps.restclienttemplate.TwitterClient;
-import com.codepath.apps.restclienttemplate.models.Tweet;
+import com.codepath.apps.restclienttemplate.UserAdapter;
+import com.codepath.apps.restclienttemplate.models.User;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
 import org.json.JSONArray;
@@ -33,23 +33,25 @@ import cz.msebera.android.httpclient.Header;
 import static com.loopj.android.http.AsyncHttpClient.log;
 
 /**
- * Created by mbankole on 7/3/17.
+ * Created by mbankole on 7/5/17.
  */
 
-public class TweetListFragment extends Fragment{
+public class FollowingListFragment extends Fragment{
     private TwitterClient client;
     private String TAG = "TimelineActivityStuff";
-    private TweetAdapter tweetAdapter;
-    ArrayList<Tweet> tweets;
-    RecyclerView rvTweets;
+    private UserAdapter userAdapter;
+    ArrayList<User> users;
+    RecyclerView rvUsers;
     private SwipeRefreshLayout swipeContainer;
     FragmentManager fm;
+    User user;
 
-    public TweetListFragment() {}
+    public FollowingListFragment() {}
 
-    public static TweetListFragment newInstance() {
-        TweetListFragment frag = new TweetListFragment();
+    public static FollowingListFragment newInstance(User user) {
+        FollowingListFragment frag = new FollowingListFragment();
         Bundle args = new Bundle();
+        args.putParcelable("user", user);
         frag.setArguments(args);
         return frag;
     }
@@ -65,40 +67,42 @@ public class TweetListFragment extends Fragment{
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_tweet_list, container, false);
-        client = TwitterApp.getRestClient();
-        //find the recyclerview
-        rvTweets = (RecyclerView)v.findViewById(R.id.rvTweet);
-        //init the arraylist
-        tweets = new ArrayList<>();
-        //construct the adapter
-        tweetAdapter = new TweetAdapter(tweets);
-        tweetAdapter.setFm(fm);
-        return v;
+        return inflater.inflate(R.layout.fragment_tweet_list, container, false);
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+
+        client = TwitterApp.getRestClient();
+        //find the recyclerview
+        rvUsers = (RecyclerView)view.findViewById(R.id.rvTweet);
+        //init the arraylist
+        users = new ArrayList<>();
+        //construct the adapter
+        userAdapter = new UserAdapter(users);
+        //userAdapter.setFm(fm);
+
+        user = getArguments().getParcelable("user");
         debug("loaded up");
         super.onCreate(savedInstanceState);
         final Context context = getContext();
 
         //recyclerview setup
         LinearLayoutManager layoutManager = new LinearLayoutManager(context);
-        rvTweets.setLayoutManager(layoutManager);
-        rvTweets.setAdapter(tweetAdapter);
+        rvUsers.setLayoutManager(layoutManager);
+        rvUsers.setAdapter(userAdapter);
         EndlessRecyclerViewScrollListener scroller = new EndlessRecyclerViewScrollListener(layoutManager) {
             @Override
             public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
                 //Toast.makeText(context, "WHAT MORE", Toast.LENGTH_LONG).show();
-                loadMoreTimeline(totalItemsCount - 1);
+                //loadMoreTimeline(totalItemsCount - 1);
             }
         };
-        rvTweets.addOnScrollListener(scroller);
+        rvUsers.addOnScrollListener(scroller);
 
-        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(rvTweets.getContext(),
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(rvUsers.getContext(),
                 Configuration.ORIENTATION_PORTRAIT);
-        rvTweets.addItemDecoration(dividerItemDecoration);
+        rvUsers.addItemDecoration(dividerItemDecoration);
 
         swipeContainer = (SwipeRefreshLayout) view.findViewById(R.id.swipeContainer);
         // Setup refresh listener which triggers new data loading
@@ -108,13 +112,13 @@ public class TweetListFragment extends Fragment{
                 // Your code to refresh the list here.
                 // Make sure you call swipeContainer.setRefreshing(false)
                 // once the network request has completed successfully.
-                tweetAdapter.clear();
+                userAdapter.clear();
                 populateTimeline();
             }
         });
 
         //jank shit
-        tweetAdapter.setSwipeContainer(swipeContainer);
+        //userAdapter.setSwipeContainer(swipeContainer);
 
         swipeContainer.setColorSchemeResources(android.R.color.holo_blue_bright,
                 android.R.color.holo_green_light,
@@ -124,28 +128,30 @@ public class TweetListFragment extends Fragment{
     }
 
     private void loadMoreTimeline(int lastIndex) {
-        long lastId = tweets.get(lastIndex).getUid();
+        long lastId = users.get(lastIndex).uid;
         swipeContainer.setRefreshing(true);
         debug(String.valueOf(lastId));
-        client.getHomeTimelineBefore(lastId, new JsonHttpResponseHandler() {
+        client.getUserTimelineBefore(user.uid, lastId, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 log.d("TwitterClient", response.toString());
+                try {
+                    JSONArray results = response.getJSONArray("users");
+                    for (int i = 0; i < results.length(); i++) {
+                        users.add(User.fromJSON(results.getJSONObject(i)));
+                        userAdapter.notifyItemInserted(users.size() - 1);
+                        swipeContainer.setRefreshing(false);
+                    }
+                }
+                catch (JSONException e) {
+                    log.d("FollowersListFragment", e.toString());
+                }
             }
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
                 log.d("TwitterClient", response.toString());
-                for (int i = 0; i < response.length(); i++) {
-                    try {
-                        Tweet tweet = Tweet.fromJSON(response.getJSONObject(i));
-                        tweets.add(tweet);
-                        tweetAdapter.notifyItemInserted(tweets.size() - 1);
-                        swipeContainer.setRefreshing(false);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
+
             }
 
             @Override
@@ -172,25 +178,26 @@ public class TweetListFragment extends Fragment{
     private void populateTimeline() {
         swipeContainer.setRefreshing(true);
 
-        client.getHomeTimeline( new JsonHttpResponseHandler() {
+        client.getFollowersList(user.uid, true, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 log.d("TwitterClient", response.toString());
+                try {
+                    JSONArray results = response.getJSONArray("users");
+                    for (int i = 0; i < results.length(); i++) {
+                        users.add(User.fromJSON(results.getJSONObject(i)));
+                        userAdapter.notifyItemInserted(users.size() - 1);
+                        swipeContainer.setRefreshing(false);
+                    }
+                }
+                catch (JSONException e) {
+                    log.d("FollowersListFragment", e.toString());
+                }
             }
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
                 log.d("TwitterClient", response.toString());
-                for (int i = 0; i < response.length(); i++) {
-                    try {
-                        Tweet tweet = Tweet.fromJSON(response.getJSONObject(i));
-                        tweets.add(tweet);
-                        tweetAdapter.notifyItemInserted(tweets.size() - 1);
-                        swipeContainer.setRefreshing(false);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
             }
 
             @Override
@@ -215,12 +222,5 @@ public class TweetListFragment extends Fragment{
 
     public void debug(String message) {
         log.d(TAG, message);
-    }
-
-    public void addTweet(Tweet tweet) {
-        debug("got tweet " + tweet.toString());
-        tweets.add(0, tweet);
-        tweetAdapter.notifyItemInserted(0);
-        rvTweets.smoothScrollToPosition(0);
     }
 }

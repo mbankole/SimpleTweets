@@ -33,10 +33,10 @@ import cz.msebera.android.httpclient.Header;
 import static com.loopj.android.http.AsyncHttpClient.log;
 
 /**
- * Created by mbankole on 7/3/17.
+ * Created by mbankole on 7/5/17.
  */
 
-public class TweetListFragment extends Fragment{
+public class TweetSearchResultsFragment extends Fragment{
     private TwitterClient client;
     private String TAG = "TimelineActivityStuff";
     private TweetAdapter tweetAdapter;
@@ -44,12 +44,14 @@ public class TweetListFragment extends Fragment{
     RecyclerView rvTweets;
     private SwipeRefreshLayout swipeContainer;
     FragmentManager fm;
+    String query;
 
-    public TweetListFragment() {}
+    public TweetSearchResultsFragment() {}
 
-    public static TweetListFragment newInstance() {
-        TweetListFragment frag = new TweetListFragment();
+    public static TweetSearchResultsFragment newInstance(String query) {
+        TweetSearchResultsFragment frag = new TweetSearchResultsFragment();
         Bundle args = new Bundle();
+        args.putString("query", query);
         frag.setArguments(args);
         return frag;
     }
@@ -60,25 +62,28 @@ public class TweetListFragment extends Fragment{
 
     public void setFm(FragmentManager fm) {
         this.fm = fm;
+
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_tweet_list, container, false);
+        return inflater.inflate(R.layout.fragment_tweet_list, container, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+
         client = TwitterApp.getRestClient();
         //find the recyclerview
-        rvTweets = (RecyclerView)v.findViewById(R.id.rvTweet);
+        rvTweets = (RecyclerView)view.findViewById(R.id.rvTweet);
         //init the arraylist
         tweets = new ArrayList<>();
         //construct the adapter
         tweetAdapter = new TweetAdapter(tweets);
         tweetAdapter.setFm(fm);
-        return v;
-    }
+        query = getArguments().getString("query");
 
-    @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         debug("loaded up");
         super.onCreate(savedInstanceState);
         final Context context = getContext();
@@ -91,7 +96,7 @@ public class TweetListFragment extends Fragment{
             @Override
             public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
                 //Toast.makeText(context, "WHAT MORE", Toast.LENGTH_LONG).show();
-                loadMoreTimeline(totalItemsCount - 1);
+                //loadMoreTimeline(totalItemsCount - 1);
             }
         };
         rvTweets.addOnScrollListener(scroller);
@@ -123,11 +128,12 @@ public class TweetListFragment extends Fragment{
         populateTimeline();
     }
 
+    /*
     private void loadMoreTimeline(int lastIndex) {
         long lastId = tweets.get(lastIndex).getUid();
         swipeContainer.setRefreshing(true);
         debug(String.valueOf(lastId));
-        client.getHomeTimelineBefore(lastId, new JsonHttpResponseHandler() {
+        client.getUserTimelineBefore(user.uid, lastId, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 log.d("TwitterClient", response.toString());
@@ -167,30 +173,31 @@ public class TweetListFragment extends Fragment{
             }
         });
     }
-
+    */
 
     private void populateTimeline() {
         swipeContainer.setRefreshing(true);
 
-        client.getHomeTimeline( new JsonHttpResponseHandler() {
+        client.searchTweets(query, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 log.d("TwitterClient", response.toString());
+                try {
+                    JSONArray results = response.getJSONArray("statuses");
+                    for (int i = 0; i < results.length(); i++) {
+                        Tweet tweet = Tweet.fromJSON(results.getJSONObject(i));
+                        tweets.add(tweet);
+                        tweetAdapter.notifyItemInserted(tweets.size() - 1);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                swipeContainer.setRefreshing(false);
             }
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
                 log.d("TwitterClient", response.toString());
-                for (int i = 0; i < response.length(); i++) {
-                    try {
-                        Tweet tweet = Tweet.fromJSON(response.getJSONObject(i));
-                        tweets.add(tweet);
-                        tweetAdapter.notifyItemInserted(tweets.size() - 1);
-                        swipeContainer.setRefreshing(false);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
             }
 
             @Override

@@ -61,6 +61,21 @@ public class TwitterClient extends OAuthBaseClient {
         client.get(apiUrl, params, handler);
     }
 
+    public void getUserTimeline(long Id, AsyncHttpResponseHandler handler) {
+		String apiUrl = getApiUrl("statuses/user_timeline.json");
+		RequestParams params = new RequestParams();
+		params.put("user_id", Id);
+		client.get(apiUrl, params, handler);
+	}
+
+	public void getUserTimelineBefore(long Id, long maxId, AsyncHttpResponseHandler handler) {
+		String apiUrl = getApiUrl("statuses/user_timeline.json");
+		RequestParams params = new RequestParams();
+		params.put("user_id", Id);
+		params.put("max_id", maxId - 1);
+		client.get(apiUrl, params, handler);
+	}
+
 	public void getMentions(AsyncHttpResponseHandler handler) {
 		String apiUrl = getApiUrl("statuses/mentions_timeline.json");
 		// Can specify query string params directly or through RequestParams.
@@ -136,8 +151,9 @@ public class TwitterClient extends OAuthBaseClient {
 		// Can specify query string params directly or through RequestParams.
 		RequestParams params = new RequestParams();
 		params.put("user_id", userId);
+		params.put("count", 100);
 		params.put("skip_status", skip);
-		client.post(apiUrl, params, handler);
+		client.get(apiUrl, params, handler);
 	}
 
 	public void getUserInfo(AsyncHttpResponseHandler handler) {
@@ -147,6 +163,45 @@ public class TwitterClient extends OAuthBaseClient {
 		RequestParams params = new RequestParams();
 		client.get(apiUrl, params, handler);
 	}
+
+	public void searchTweets(String query, AsyncHttpResponseHandler handler) {
+		String apiUrl = getApiUrl("search/tweets.json");
+		Log.d("TWITTERCLIENT", apiUrl);
+		// Can specify query string params directly or through RequestParams.
+		RequestParams params = new RequestParams();
+		params.put("q", query);
+		client.get(apiUrl, params, handler);
+	}
+
+	public void searchTweetsBefore(Long maxID, String query, AsyncHttpResponseHandler handler) {
+		String apiUrl = getApiUrl("search/tweets.json");
+		Log.d("TWITTERCLIENT", apiUrl);
+		// Can specify query string params directly or through RequestParams.
+		RequestParams params = new RequestParams();
+		params.put("q", query);
+		params.put("max_id", maxID - 1);
+		client.get(apiUrl, params, handler);
+	}
+
+	public void searchUsers(String query, AsyncHttpResponseHandler handler) {
+		String apiUrl = getApiUrl("users/search.json");
+		Log.d("TWITTERCLIENT", apiUrl);
+		// Can specify query string params directly or through RequestParams.
+		RequestParams params = new RequestParams();
+		params.put("q", query);
+		client.get(apiUrl, params, handler);
+	}
+
+	public void searchUsersBefore(Long maxID, String query, AsyncHttpResponseHandler handler) {
+		String apiUrl = getApiUrl("users/search.json");
+		Log.d("TWITTERCLIENT", apiUrl);
+		// Can specify query string params directly or through RequestParams.
+		RequestParams params = new RequestParams();
+		params.put("q", query);
+		params.put("max_id", maxID - 1);
+		client.get(apiUrl, params, handler);
+	}
+
 
 	/* 1. Define the endpoint URL with getApiUrl and pass a relative path to the endpoint
 	 * 	  i.e getApiUrl("statuses/home_timeline.json");

@@ -17,12 +17,14 @@ public class User implements Parcelable{
     public String screenName;
     public String profileImageUrl;
     public int followerCount;
+    public int statusesCount;
     public String profileSidebarBorderColor;
     public String profileSidebarFillColor;
     public String profileLinkColor;
     public String profileBannerUrl;
     public boolean verified;
     public String profileBackgroundColor;
+    public String description;
 
     //deserializer
 
@@ -39,11 +41,15 @@ public class User implements Parcelable{
         user.profileBannerUrl = obj.optString("profile_banner_url", null);
         if (user.profileBannerUrl != null) user.profileBannerUrl = user.profileBannerUrl + "/600x200";
         user.followerCount = obj.getInt("followers_count");
+        user.statusesCount = obj.getInt("statuses_count");
         user.profileSidebarBorderColor = obj.getString("profile_sidebar_border_color");
         user.profileBackgroundColor = obj.getString("profile_background_color");
         user.profileSidebarFillColor = obj.getString("profile_sidebar_fill_color");
         user.profileLinkColor = obj.getString("profile_link_color");
         user.verified = obj.getBoolean("verified");
+        user.description = obj.optString("description", "");
+
+        user.profileImageUrl = user.profileImageUrl.replace("_normal.jpg", "_bigger.jpg");
         return user;
     }
 
@@ -59,12 +65,14 @@ public class User implements Parcelable{
         dest.writeString(this.screenName);
         dest.writeString(this.profileImageUrl);
         dest.writeInt(this.followerCount);
+        dest.writeInt(this.statusesCount);
         dest.writeString(this.profileSidebarBorderColor);
         dest.writeString(this.profileSidebarFillColor);
         dest.writeString(this.profileLinkColor);
         dest.writeString(this.profileBannerUrl);
         dest.writeByte(this.verified ? (byte) 1 : (byte) 0);
         dest.writeString(this.profileBackgroundColor);
+        dest.writeString(this.description);
     }
 
     protected User(Parcel in) {
@@ -73,12 +81,14 @@ public class User implements Parcelable{
         this.screenName = in.readString();
         this.profileImageUrl = in.readString();
         this.followerCount = in.readInt();
+        this.statusesCount = in.readInt();
         this.profileSidebarBorderColor = in.readString();
         this.profileSidebarFillColor = in.readString();
         this.profileLinkColor = in.readString();
         this.profileBannerUrl = in.readString();
         this.verified = in.readByte() != 0;
         this.profileBackgroundColor = in.readString();
+        this.description = in.readString();
     }
 
     public static final Creator<User> CREATOR = new Creator<User>() {

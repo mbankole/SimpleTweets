@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/tvUserDescription"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="5dp"
+        android:textSize="18sp"
+        android:text="user description lots of useful stuff and insight here" />
+
+    <TextView
+        android:id="@+id/tvFollowers"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/tvUserDescription"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:text="Followers:"
+        android:textSize="15sp" />
+
+    <TextView
+        android:id="@+id/tvTweets"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/tvFollowers"
+        android:layout_marginStart="5dp"
+        android:text="Tweets:"
+        android:textSize="15sp" />
+
+    <TextView
+        android:id="@+id/tvFollowersCount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/tvFollowers"
+        android:layout_marginStart="4dp"
+        android:layout_toEndOf="@+id/tvFollowers"
+        android:text="##"
+        android:textSize="15sp" />
+
+    <TextView
+        android:id="@+id/tvTweetCount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tvFollowers"
+        android:layout_marginStart="4dp"
+        android:layout_toEndOf="@+id/tvTweets"
+        android:text="##"
+        android:textSize="15sp" />
+
+</RelativeLayout>

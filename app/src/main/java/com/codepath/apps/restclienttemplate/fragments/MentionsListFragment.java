@@ -14,7 +14,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.codepath.apps.restclienttemplate.ComposeTweetDialogFragment;
 import com.codepath.apps.restclienttemplate.EndlessRecyclerViewScrollListener;
 import com.codepath.apps.restclienttemplate.R;
 import com.codepath.apps.restclienttemplate.TweetAdapter;
@@ -37,7 +36,7 @@ import static com.loopj.android.http.AsyncHttpClient.log;
  * Created by mbankole on 7/3/17.
  */
 
-public class MentionsListFragment extends Fragment implements ComposeTweetDialogFragment.ComposeTweetDialogListener {
+public class MentionsListFragment extends Fragment {
     private TwitterClient client;
     private String TAG = "TimelineActivityStuff";
     private TweetAdapter tweetAdapter;
@@ -219,13 +218,6 @@ public class MentionsListFragment extends Fragment implements ComposeTweetDialog
         log.d(TAG, message);
     }
 
-    @Override
-    public void onFinishEditTweet(Tweet tweet) {
-        debug("got tweet " + tweet.toString());
-        tweets.add(0, tweet);
-        tweetAdapter.notifyItemInserted(0);
-        rvTweets.smoothScrollToPosition(0);
-    }
 
     public void addTweet(Tweet tweet) {
         debug("got tweet " + tweet.toString());

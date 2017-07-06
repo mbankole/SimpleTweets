@@ -4,10 +4,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,8 +21,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-
 import cz.msebera.android.httpclient.Header;
 
 import static com.loopj.android.http.AsyncHttpClient.log;
@@ -31,10 +29,6 @@ public class TimelineActivity extends AppCompatActivity implements ComposeTweetD
 
     private TwitterClient client;
     private String TAG = "TimelineActivityStuff";
-    private TweetAdapter tweetAdapter;
-    ArrayList<Tweet> tweets;
-    RecyclerView rvTweets;
-    private SwipeRefreshLayout swipeContainer;
     TweetFragmentPagerAdapter fragmentPager;
 
 
@@ -56,149 +50,34 @@ public class TimelineActivity extends AppCompatActivity implements ComposeTweetD
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         client = TwitterApp.getRestClient();
-        /*
-        final Context context = this;
-        //find the recyclerview
-        rvTweets = (RecyclerView)findViewById(R.id.rvTweet);
-        //init the arraylist
-        tweets = new ArrayList<>();
-        //construct the adapter
-        tweetAdapter = new TweetAdapter(tweets);
 
-        //recyclerview setup
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        rvTweets.setLayoutManager(layoutManager);
-        rvTweets.setAdapter(tweetAdapter);
-        EndlessRecyclerViewScrollListener scroller = new EndlessRecyclerViewScrollListener(layoutManager) {
-            @Override
-            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
-                //Toast.makeText(context, "WHAT MORE", Toast.LENGTH_LONG).show();
-                loadMoreTimeline(totalItemsCount - 1);
-            }
-        };
-        rvTweets.addOnScrollListener(scroller);
-
-        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(rvTweets.getContext(),
-                Configuration.ORIENTATION_PORTRAIT);
-        rvTweets.addItemDecoration(dividerItemDecoration);
-
-        swipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipeContainer);
-        // Setup refresh listener which triggers new data loading
-        swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                // Your code to refresh the list here.
-                // Make sure you call swipeContainer.setRefreshing(false)
-                // once the network request has completed successfully.
-                tweetAdapter.clear();
-                populateTimeline();
-            }
-        });
-
-        //jank shit
-        tweetAdapter.fm = getSupportFragmentManager();
-        tweetAdapter.swipeContainer = swipeContainer;
-
-        swipeContainer.setColorSchemeResources(android.R.color.holo_blue_bright,
-                android.R.color.holo_green_light,
-                android.R.color.holo_orange_light,
-                android.R.color.holo_red_light);
-        populateTimeline();*/
-    }
-
-    private void loadMoreTimeline(int lastIndex) {
-        long lastId = tweets.get(lastIndex).getUid();
-        swipeContainer.setRefreshing(true);
-        debug(String.valueOf(lastId));
-        client.getHomeTimelineBefore(lastId, new JsonHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                log.d("TwitterClient", response.toString());
-            }
-
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
-                log.d("TwitterClient", response.toString());
-                for (int i = 0; i < response.length(); i++) {
-                    try {
-                        Tweet tweet = Tweet.fromJSON(response.getJSONObject(i));
-                        tweets.add(tweet);
-                        tweetAdapter.notifyItemInserted(tweets.size() - 1);
-                        swipeContainer.setRefreshing(false);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                log.d("TwitterClient", responseString);
-                throwable.printStackTrace();
-            }
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-                log.d("TwitterClient", errorResponse.toString());
-                throwable.printStackTrace();
-            }
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
-                log.d("TwitterClient", errorResponse.toString());
-                throwable.printStackTrace();
-            }
-        });
-    }
-
-
-    private void populateTimeline() {
-        swipeContainer.setRefreshing(true);
-
-        client.getHomeTimeline( new JsonHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                log.d("TwitterClient", response.toString());
-            }
-
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
-                log.d("TwitterClient", response.toString());
-                for (int i = 0; i < response.length(); i++) {
-                    try {
-                        Tweet tweet = Tweet.fromJSON(response.getJSONObject(i));
-                        tweets.add(tweet);
-                        tweetAdapter.notifyItemInserted(tweets.size() - 1);
-                        swipeContainer.setRefreshing(false);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                log.d("TwitterClient", responseString);
-                throwable.printStackTrace();
-            }
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-                log.d("TwitterClient", errorResponse.toString());
-                throwable.printStackTrace();
-            }
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
-                log.d("TwitterClient", errorResponse.toString());
-                throwable.printStackTrace();
-            }
-        });
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        final SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                // perform query here
+                Intent i = new Intent(TimelineActivity.this, SearchActivity.class);
+                i.putExtra("query", query);
+                getApplicationContext().startActivity(i);
+                // workaround to avoid issues with some emulators and keyboard devices firing twice if a keyboard enter is used
+                // see https://code.google.com/p/android/issues/detail?id=24599
+                searchView.clearFocus();
+
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
+
         return true;
     }
 
@@ -209,70 +88,6 @@ public class TimelineActivity extends AppCompatActivity implements ComposeTweetD
     public void onProfileAction(MenuItem mi) {
         Toast.makeText(this, "PROFILE", Toast.LENGTH_LONG).show();
         showUser();
-    }
-
-    /*@Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // REQUEST_CODE is defined above
-        if (resultCode == RESULT_OK && requestCode == REQUEST_CODE) {
-            Tweet nTweet = (Tweet)data.getParcelableExtra("tweet");
-            nTweet.user = (User)data.getParcelableExtra("user");
-            debug("got tweet " + nTweet.toString());
-            tweets.add(0, nTweet);
-            tweetAdapter.notifyItemInserted(0);
-            rvTweets.smoothScrollToPosition(0);
-        }
-    }*/
-
-    private void sendTweet(String message) {
-        client.sendTweet( message, new JsonHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                debug("first on success");
-                try {
-                    Tweet tweet = Tweet.fromJSON(response);
-                    tweets.add(0, tweet);
-                    tweetAdapter.notifyItemInserted(0);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
-                debug("second on success");
-                for (int i = 0; i < response.length(); i++) {
-                    try {
-                        Tweet tweet = Tweet.fromJSON(response.getJSONObject(i));
-                        tweets.add(tweet);
-                        tweetAdapter.notifyItemInserted(tweets.size() - 1);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                debug("error 1");
-                log.d("TwitterClient", responseString);
-                throwable.printStackTrace();
-            }
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-                debug("error 2");
-                log.d("TwitterClient", errorResponse.toString());
-                throwable.printStackTrace();
-            }
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
-                debug("error 3");
-                log.d("TwitterClient", errorResponse.toString());
-                throwable.printStackTrace();
-            }
-        });
     }
 
     private void showEditDialog() {

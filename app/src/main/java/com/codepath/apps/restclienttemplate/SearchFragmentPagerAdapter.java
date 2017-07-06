@@ -5,25 +5,27 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
-import com.codepath.apps.restclienttemplate.fragments.MentionsListFragment;
-import com.codepath.apps.restclienttemplate.fragments.TweetListFragment;
+import com.codepath.apps.restclienttemplate.fragments.TweetSearchResultsFragment;
+import com.codepath.apps.restclienttemplate.fragments.UserSearchResultsFragment;
 
 /**
- * Created by mbankole on 7/3/17.
+ * Created by mbankole on 7/5/17.
  */
 
-public class TweetFragmentPagerAdapter extends FragmentPagerAdapter {
+public class SearchFragmentPagerAdapter extends FragmentPagerAdapter {
     final int PAGE_COUNT = 2;
-    private String tabTitles[] = new String[] { "Timeline", "Mentions" };
+    private String tabTitles[] = new String[] { "Tweets", "Users" };
     private Context context;
     FragmentManager fragmentManager;
-    TweetListFragment tweetListFragment;
-    MentionsListFragment mentionsListFragment;
+    TweetSearchResultsFragment tweetListFragment;
+    UserSearchResultsFragment userListFragment;
+    String query;
 
-    public TweetFragmentPagerAdapter(FragmentManager fm, Context context) {
+    public SearchFragmentPagerAdapter(FragmentManager fm, Context context, String query) {
         super(fm);
         fragmentManager = fm;
         this.context = context;
+        this.query = query;
     }
 
     @Override
@@ -35,13 +37,13 @@ public class TweetFragmentPagerAdapter extends FragmentPagerAdapter {
     public Fragment getItem(int position) {
         switch (position) {
             case 0:
-                tweetListFragment = new TweetListFragment();
+                tweetListFragment = TweetSearchResultsFragment.newInstance(query);
                 tweetListFragment.setFm(fragmentManager);
                 return tweetListFragment;
             case 1:
-                mentionsListFragment = new MentionsListFragment();
-                mentionsListFragment.setFm(fragmentManager);
-                return mentionsListFragment;
+                userListFragment = UserSearchResultsFragment.newInstance(query);
+                userListFragment.setFm(fragmentManager);
+                return userListFragment;
             default:
                 return null;
         }

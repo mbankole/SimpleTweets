@@ -62,6 +62,7 @@
         android:layout_height="wrap_content"
         android:layout_toEndOf="@id/ivProfileImage"
         android:layout_below="@id/tvUserName"
+        android:textSize="11sp"
         android:maxLines="1"
         android:text="Replying to " />
 
@@ -71,6 +72,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/tvUserName"
         android:layout_toEndOf="@id/tvReplying"
+        android:textSize="11sp"
         android:maxLines="1"
         android:text="#name" />
 

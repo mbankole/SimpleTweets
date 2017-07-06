@@ -20,6 +20,7 @@ import com.codepath.apps.restclienttemplate.TweetAdapter;
 import com.codepath.apps.restclienttemplate.TwitterApp;
 import com.codepath.apps.restclienttemplate.TwitterClient;
 import com.codepath.apps.restclienttemplate.models.Tweet;
+import com.codepath.apps.restclienttemplate.models.User;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
 import org.json.JSONArray;
@@ -33,10 +34,10 @@ import cz.msebera.android.httpclient.Header;
 import static com.loopj.android.http.AsyncHttpClient.log;
 
 /**
- * Created by mbankole on 7/3/17.
+ * Created by mbankole on 7/5/17.
  */
 
-public class TweetListFragment extends Fragment{
+public class UserTweetsListFragment extends Fragment {
     private TwitterClient client;
     private String TAG = "TimelineActivityStuff";
     private TweetAdapter tweetAdapter;
@@ -44,12 +45,15 @@ public class TweetListFragment extends Fragment{
     RecyclerView rvTweets;
     private SwipeRefreshLayout swipeContainer;
     FragmentManager fm;
+    User user;
 
-    public TweetListFragment() {}
 
-    public static TweetListFragment newInstance() {
-        TweetListFragment frag = new TweetListFragment();
+    public UserTweetsListFragment() {}
+
+    public static UserTweetsListFragment newInstance(User user) {
+        UserTweetsListFragment frag = new UserTweetsListFragment();
         Bundle args = new Bundle();
+        args.putParcelable("user", user);
         frag.setArguments(args);
         return frag;
     }
@@ -60,25 +64,28 @@ public class TweetListFragment extends Fragment{
 
     public void setFm(FragmentManager fm) {
         this.fm = fm;
+
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_tweet_list, container, false);
-        client = TwitterApp.getRestClient();
-        //find the recyclerview
-        rvTweets = (RecyclerView)v.findViewById(R.id.rvTweet);
-        //init the arraylist
-        tweets = new ArrayList<>();
-        //construct the adapter
-        tweetAdapter = new TweetAdapter(tweets);
-        tweetAdapter.setFm(fm);
-        return v;
+        return inflater.inflate(R.layout.fragment_tweet_list, container, false);
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+
+        client = TwitterApp.getRestClient();
+        //find the recyclerview
+        rvTweets = (RecyclerView)view.findViewById(R.id.rvTweet);
+        //init the arraylist
+        tweets = new ArrayList<>();
+        //construct the adapter
+        tweetAdapter = new TweetAdapter(tweets);
+        //usersAdapter.setFm(fm);
+
+        user = getArguments().getParcelable("user");
         debug("loaded up");
         super.onCreate(savedInstanceState);
         final Context context = getContext();
@@ -127,7 +134,7 @@ public class TweetListFragment extends Fragment{
         long lastId = tweets.get(lastIndex).getUid();
         swipeContainer.setRefreshing(true);
         debug(String.valueOf(lastId));
-        client.getHomeTimelineBefore(lastId, new JsonHttpResponseHandler() {
+        client.getUserTimelineBefore(user.uid, lastId, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 log.d("TwitterClient", response.toString());
@@ -172,7 +179,7 @@ public class TweetListFragment extends Fragment{
     private void populateTimeline() {
         swipeContainer.setRefreshing(true);
 
-        client.getHomeTimeline( new JsonHttpResponseHandler() {
+        client.getUserTimeline(user.uid, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 log.d("TwitterClient", response.toString());

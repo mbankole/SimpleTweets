@@ -26,6 +26,22 @@ public class TweetFragmentPagerAdapter extends FragmentPagerAdapter {
         this.context = context;
     }
 
+    public TweetListFragment getTweetListFragment() {
+        if (tweetListFragment == null) {
+            tweetListFragment = new TweetListFragment();
+            tweetListFragment.setFm(fragmentManager);
+        }
+        return tweetListFragment;
+    }
+
+    public MentionsListFragment getMentionsListFragment() {
+        if (mentionsListFragment == null) {
+            mentionsListFragment = new MentionsListFragment();
+            mentionsListFragment.setFm(fragmentManager);
+        }
+        return mentionsListFragment;
+    }
+
     @Override
     public int getCount() {
         return PAGE_COUNT;
@@ -35,13 +51,9 @@ public class TweetFragmentPagerAdapter extends FragmentPagerAdapter {
     public Fragment getItem(int position) {
         switch (position) {
             case 0:
-                tweetListFragment = new TweetListFragment();
-                tweetListFragment.setFm(fragmentManager);
-                return tweetListFragment;
+                return getTweetListFragment();
             case 1:
-                mentionsListFragment = new MentionsListFragment();
-                mentionsListFragment.setFm(fragmentManager);
-                return mentionsListFragment;
+                return getMentionsListFragment();
             default:
                 return null;
         }

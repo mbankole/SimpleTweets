@@ -28,25 +28,37 @@ public class SearchFragmentPagerAdapter extends FragmentPagerAdapter {
         this.query = query;
     }
 
-    @Override
-    public int getCount() {
-        return PAGE_COUNT;
+    public TweetSearchResultsFragment getTweetListFragment() {
+        if (tweetListFragment == null) {
+            tweetListFragment = TweetSearchResultsFragment.newInstance(query);
+            tweetListFragment.setFm(fragmentManager);
+        }
+        return tweetListFragment;
+    }
+
+    public UserSearchResultsFragment getUserListFragment() {
+        if (userListFragment == null) {
+            userListFragment = UserSearchResultsFragment.newInstance(query);
+            userListFragment.setFm(fragmentManager);
+        }
+        return userListFragment;
     }
 
     @Override
     public Fragment getItem(int position) {
         switch (position) {
             case 0:
-                tweetListFragment = TweetSearchResultsFragment.newInstance(query);
-                tweetListFragment.setFm(fragmentManager);
-                return tweetListFragment;
+                return getTweetListFragment();
             case 1:
-                userListFragment = UserSearchResultsFragment.newInstance(query);
-                userListFragment.setFm(fragmentManager);
-                return userListFragment;
+                return getUserListFragment();
             default:
                 return null;
         }
+    }
+
+    @Override
+    public int getCount() {
+        return PAGE_COUNT;
     }
 
     @Override

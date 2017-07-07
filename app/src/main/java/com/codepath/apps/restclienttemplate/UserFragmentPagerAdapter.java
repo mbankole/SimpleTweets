@@ -6,6 +6,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
 import com.codepath.apps.restclienttemplate.fragments.FollowerListFragment;
+import com.codepath.apps.restclienttemplate.fragments.UserFriendsFragment;
 import com.codepath.apps.restclienttemplate.fragments.UserInfoFragment;
 import com.codepath.apps.restclienttemplate.fragments.UserTweetsListFragment;
 import com.codepath.apps.restclienttemplate.models.User;
@@ -16,12 +17,13 @@ import com.codepath.apps.restclienttemplate.models.User;
 
 public class UserFragmentPagerAdapter extends FragmentPagerAdapter {
     final int PAGE_COUNT = 3;
-    private String tabTitles[] = new String[] { "UserInfo", "followers","Tweets" };
+    private String tabTitles[] = new String[] { "Tweets", "followers","Friends" };
     private Context context;
     FragmentManager fragmentManager;
     UserInfoFragment userInfoFragment;
     UserTweetsListFragment userTweetsListFragment;
     FollowerListFragment followerListFragment;
+    UserFriendsFragment userFriendsFragment;
     User user;
 
     public UserFragmentPagerAdapter(FragmentManager fm, Context context, User user) {
@@ -29,30 +31,50 @@ public class UserFragmentPagerAdapter extends FragmentPagerAdapter {
         fragmentManager = fm;
         this.context = context;
         this.user = user;
-        tabTitles = new String[] { "UserInfo", "followers (" + user.followerCount + ")","Tweets" };
+        tabTitles = new String[] { "Tweets (" + user.statusesCount + ")",
+                "followers (" + user.followerCount + ")",
+                "Friends (" + user.friendsCount + ")" };
     }
 
-    @Override
-    public int getCount() {
-        return PAGE_COUNT;
+    public UserFriendsFragment getUserFriendsFragment() {
+        if (userFriendsFragment == null) {
+            userFriendsFragment = UserFriendsFragment.newInstance(user);
+        }
+        return userFriendsFragment;
+    }
+
+    public FollowerListFragment getFollowerListFragment() {
+        if (followerListFragment == null) {
+            followerListFragment = FollowerListFragment.newInstance(user);
+        }
+        return followerListFragment;
+    }
+
+    public UserTweetsListFragment getUserTweetsListFragment() {
+        if (userTweetsListFragment == null) {
+            userTweetsListFragment = UserTweetsListFragment.newInstance(user);
+            userTweetsListFragment.setFm(fragmentManager);
+        }
+        return userTweetsListFragment;
     }
 
     @Override
     public Fragment getItem(int position) {
         switch (position) {
-            case 0:
-                userInfoFragment = UserInfoFragment.newInstance(user);
-                return userInfoFragment;
-            case 1:
-                followerListFragment = FollowerListFragment.newInstance(user);
-                return  followerListFragment;
             case 2:
-                userTweetsListFragment = UserTweetsListFragment.newInstance(user);
-                userTweetsListFragment.setFm(fragmentManager);
-                return userTweetsListFragment;
+                return getUserFriendsFragment();
+            case 1:
+                return getFollowerListFragment();
+            case 0:
+                return getUserTweetsListFragment();
             default:
                 return null;
         }
+    }
+
+    @Override
+    public int getCount() {
+        return PAGE_COUNT;
     }
 
     @Override

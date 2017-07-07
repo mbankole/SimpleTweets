@@ -18,6 +18,7 @@ public class User implements Parcelable{
     public String profileImageUrl;
     public int followerCount;
     public int statusesCount;
+    public int friendsCount;
     public String profileSidebarBorderColor;
     public String profileSidebarFillColor;
     public String profileLinkColor;
@@ -42,6 +43,7 @@ public class User implements Parcelable{
         if (user.profileBannerUrl != null) user.profileBannerUrl = user.profileBannerUrl + "/600x200";
         user.followerCount = obj.getInt("followers_count");
         user.statusesCount = obj.getInt("statuses_count");
+        user.friendsCount = obj.getInt("friends_count");
         user.profileSidebarBorderColor = obj.getString("profile_sidebar_border_color");
         user.profileBackgroundColor = obj.getString("profile_background_color");
         user.profileSidebarFillColor = obj.getString("profile_sidebar_fill_color");
@@ -66,6 +68,7 @@ public class User implements Parcelable{
         dest.writeString(this.profileImageUrl);
         dest.writeInt(this.followerCount);
         dest.writeInt(this.statusesCount);
+        dest.writeInt(this.friendsCount);
         dest.writeString(this.profileSidebarBorderColor);
         dest.writeString(this.profileSidebarFillColor);
         dest.writeString(this.profileLinkColor);
@@ -82,6 +85,7 @@ public class User implements Parcelable{
         this.profileImageUrl = in.readString();
         this.followerCount = in.readInt();
         this.statusesCount = in.readInt();
+        this.friendsCount = in.readInt();
         this.profileSidebarBorderColor = in.readString();
         this.profileSidebarFillColor = in.readString();
         this.profileLinkColor = in.readString();

@@ -16,6 +16,7 @@
     <color name="unfavorited">#999999</color>
     <color name="reTweeted">#33ee33</color>
     <color name="unReTweeted">#999999</color>
+    <color name="white">#FFFFFF</color>
 
 
 </resources>

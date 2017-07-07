@@ -25,6 +25,7 @@ public class UserPageActivity extends AppCompatActivity {
     FragmentManager fm;
     TextView tvUserName;
     TextView tvScreenName;
+    TextView tvUserDescription;
     ImageView ivProfileImage;
     ImageView ivProfileBanner;
     ImageView ivVerified;
@@ -56,12 +57,14 @@ public class UserPageActivity extends AppCompatActivity {
 
         tvUserName = (TextView)findViewById(R.id.tvUserName);
         tvScreenName = (TextView)findViewById(R.id.tvScreenName);
+        tvUserDescription = (TextView)findViewById(R.id.tvUserDescription);
         ivProfileImage = (ImageView)findViewById(R.id.ivProfileImage);
         ivProfileBanner = (ImageView)findViewById(R.id.ivProfileBanner);
         ivVerified = (ImageView)findViewById(R.id.ivVerified);
 
         tvUserName.setText(user.name);
         tvScreenName.setText("@" + user.screenName);
+        tvUserDescription.setText(user.description);
 
         if (user.verified) ivVerified.setVisibility(View.VISIBLE);
         else ivVerified.setVisibility(View.GONE);

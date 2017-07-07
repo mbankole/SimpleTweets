@@ -19,12 +19,11 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_marginStart="5dp"
-        android:layout_marginTop="5dp"
         android:layout_toEndOf="@+id/ivProfileImage"
         android:ellipsize="end"
         android:maxLines="1"
         android:text="TextView"
-        android:textSize="20sp"
+        android:textSize="18sp"
         android:textStyle="bold"
         android:textColor="@color/primary_text_material_light"
         tools:text="UserName"/>
@@ -35,7 +34,7 @@
         android:layout_height="15dp"
         android:layout_alignTop="@id/tvUserName"
         android:layout_toEndOf="@+id/tvUserName"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="6dp"
         android:layout_marginStart="5dp"
         android:tint="@color/colorPrimary"
         app:srcCompat="@drawable/ic_verification_symbol"
@@ -52,7 +51,7 @@
         android:maxLines="1"
         android:text="%screenname"
         android:textColor="@color/secondary_text_material_light"
-        android:textSize="18sp"/>
+        android:textSize="16sp"/>
 
     <TextView
         android:id="@+id/tvUserDescription"
@@ -61,6 +60,7 @@
         android:layout_marginStart="5dp"
         android:layout_below="@+id/tvScreenName"
         android:layout_toEndOf="@+id/ivProfileImage"
+        android:textSize="14sp"
         android:text="user description lots of useful stuff and insight here" />
 
 </RelativeLayout>

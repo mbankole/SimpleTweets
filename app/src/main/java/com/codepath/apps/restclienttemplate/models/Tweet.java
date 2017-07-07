@@ -48,6 +48,62 @@ public class Tweet implements Parcelable{
         return tweet;
     }
 
+    public int getReTweetCount() {
+        return reTweetCount;
+    }
+
+    public void setReTweetCount(int reTweetCount) {
+        this.reTweetCount = reTweetCount;
+    }
+
+    public int getFavoritesCount() {
+        return favoritesCount;
+    }
+
+    public void setFavoritesCount(int favoritesCount) {
+        this.favoritesCount = favoritesCount;
+    }
+
+    public String getInReplyToScreenname() {
+        return inReplyToScreenname;
+    }
+
+    public void setInReplyToScreenname(String inReplyToScreenname) {
+        this.inReplyToScreenname = inReplyToScreenname;
+    }
+
+    public String getTweetImageUrl() {
+        return tweetImageUrl;
+    }
+
+    public void setTweetImageUrl(String tweetImageUrl) {
+        this.tweetImageUrl = tweetImageUrl;
+    }
+
+    public boolean isFavorited() {
+        return favorited;
+    }
+
+    public void setFavorited(boolean favorited) {
+        this.favorited = favorited;
+    }
+
+    public boolean isReTweeted() {
+        return reTweeted;
+    }
+
+    public void setReTweeted(boolean reTweeted) {
+        this.reTweeted = reTweeted;
+    }
+
+    public boolean isReply() {
+        return isReply;
+    }
+
+    public void setReply(boolean reply) {
+        isReply = reply;
+    }
+
     public String getBody() {
         return body;
     }

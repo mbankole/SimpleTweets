@@ -13,23 +13,26 @@ import com.codepath.apps.restclienttemplate.fragments.TweetListFragment;
  */
 
 public class TweetFragmentPagerAdapter extends FragmentPagerAdapter {
-    final int PAGE_COUNT = 2;
+    int PAGE_COUNT = 2;
     private String tabTitles[] = new String[] { "Timeline", "Mentions" };
     private Context context;
     FragmentManager fragmentManager;
     TweetListFragment tweetListFragment;
     MentionsListFragment mentionsListFragment;
+    boolean connected;
 
-    public TweetFragmentPagerAdapter(FragmentManager fm, Context context) {
+    public TweetFragmentPagerAdapter(FragmentManager fm, Context context, boolean connected) {
         super(fm);
         fragmentManager = fm;
         this.context = context;
+        this.connected = connected;
     }
 
     public TweetListFragment getTweetListFragment() {
         if (tweetListFragment == null) {
             tweetListFragment = new TweetListFragment();
             tweetListFragment.setFm(fragmentManager);
+            tweetListFragment.setConnected(connected);
         }
         return tweetListFragment;
     }
@@ -38,6 +41,7 @@ public class TweetFragmentPagerAdapter extends FragmentPagerAdapter {
         if (mentionsListFragment == null) {
             mentionsListFragment = new MentionsListFragment();
             mentionsListFragment.setFm(fragmentManager);
+            mentionsListFragment.setConnected(connected);
         }
         return mentionsListFragment;
     }

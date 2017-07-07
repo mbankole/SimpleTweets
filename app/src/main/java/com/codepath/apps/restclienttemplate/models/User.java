@@ -49,10 +49,30 @@ public class User implements Parcelable{
         user.profileSidebarFillColor = obj.getString("profile_sidebar_fill_color");
         user.profileLinkColor = obj.getString("profile_link_color");
         user.verified = obj.getBoolean("verified");
-        user.description = obj.optString("description", "");
+        user.description = obj.optString("description", "").replace("'", "");
 
         user.profileImageUrl = user.profileImageUrl.replace("_normal.jpg", "_bigger.jpg");
         return user;
+    }
+
+    @Override
+    public String toString() {
+        return "{" +
+                "name='" + name + '\'' +
+                ", id=" + uid +
+                ", screen_name='" + screenName + '\'' +
+                ", profile_image_url='" + profileImageUrl + '\'' +
+                ", followers_count=" + followerCount +
+                ", statuses_count=" + statusesCount +
+                ", friends_count=" + friendsCount +
+                ", profile_sidebar_border_color='" + profileSidebarBorderColor + '\'' +
+                ", profile_sidebar_fill_color='" + profileSidebarFillColor + '\'' +
+                ", profile_link_color='" + profileLinkColor + '\'' +
+                ", profile_banner_url='" + profileBannerUrl + '\'' +
+                ", verified=" + verified +
+                ", profile_background_color='" + profileBackgroundColor + '\'' +
+                ", description='" + description + '\'' +
+                '}';
     }
 
     @Override

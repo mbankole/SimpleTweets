@@ -20,13 +20,16 @@ import com.codepath.apps.restclienttemplate.TweetAdapter;
 import com.codepath.apps.restclienttemplate.TwitterApp;
 import com.codepath.apps.restclienttemplate.TwitterClient;
 import com.codepath.apps.restclienttemplate.models.Tweet;
+import com.codepath.apps.restclienttemplate.tables.DBTweet;
 import com.loopj.android.http.JsonHttpResponseHandler;
+import com.raizlabs.android.dbflow.sql.language.SQLite;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
 
@@ -44,6 +47,7 @@ public class TweetListFragment extends Fragment{
     RecyclerView rvTweets;
     private SwipeRefreshLayout swipeContainer;
     FragmentManager fm;
+    boolean connected;
 
     public TweetListFragment() {}
 
@@ -60,6 +64,10 @@ public class TweetListFragment extends Fragment{
 
     public void setFm(FragmentManager fm) {
         this.fm = fm;
+    }
+
+    public void setConnected(boolean connected) {
+        this.connected = connected;
     }
 
     @Nullable
@@ -91,7 +99,8 @@ public class TweetListFragment extends Fragment{
             @Override
             public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
                 //Toast.makeText(context, "WHAT MORE", Toast.LENGTH_LONG).show();
-                loadMoreTimeline(totalItemsCount - 1);
+                if (connected) loadMoreTimelineConnected(totalItemsCount - 1);
+                //else loadMoreTimelineDatabase(totalItemsCount - 1);
             }
         };
         rvTweets.addOnScrollListener(scroller);
@@ -109,7 +118,8 @@ public class TweetListFragment extends Fragment{
                 // Make sure you call swipeContainer.setRefreshing(false)
                 // once the network request has completed successfully.
                 tweetAdapter.clear();
-                populateTimeline();
+                if (connected) populateTimelineConnected();
+                else populateTimelineDatabase();
             }
         });
 
@@ -120,10 +130,15 @@ public class TweetListFragment extends Fragment{
                 android.R.color.holo_green_light,
                 android.R.color.holo_orange_light,
                 android.R.color.holo_red_light);
-        populateTimeline();
+        if (connected) populateTimelineConnected();
+        else populateTimelineDatabase();
     }
 
-    private void loadMoreTimeline(int lastIndex) {
+    private void loadMoreTimelineDatabase() {
+        List<DBTweet> dbtweets = SQLite.select().from(DBTweet.class).queryList();
+    }
+
+    private void loadMoreTimelineConnected(int lastIndex) {
         long lastId = tweets.get(lastIndex).getUid();
         swipeContainer.setRefreshing(true);
         debug(String.valueOf(lastId));
@@ -168,10 +183,23 @@ public class TweetListFragment extends Fragment{
         });
     }
 
+    private void populateTimelineDatabase() {
+        List<DBTweet> dbTweetList = SQLite.select().
+                from(DBTweet.class).queryList();
+        for (int i = 0; i < dbTweetList.size(); i++) {
+            Tweet tweet = DBTweet.toTweet(dbTweetList.get(i));
+            tweets.add(tweet);
+            tweetAdapter.notifyItemInserted(tweets.size() - 1);
+        }
+    }
 
-    private void populateTimeline() {
+    private void populateTimelineConnected() {
         swipeContainer.setRefreshing(true);
-
+        List<DBTweet> dbTweetList = SQLite.select().
+                from(DBTweet.class).queryList();
+        for (int i = 0; i < dbTweetList.size(); i++) {
+            dbTweetList.get(i).delete();
+        }
         client.getHomeTimeline( new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
@@ -186,11 +214,13 @@ public class TweetListFragment extends Fragment{
                         Tweet tweet = Tweet.fromJSON(response.getJSONObject(i));
                         tweets.add(tweet);
                         tweetAdapter.notifyItemInserted(tweets.size() - 1);
-                        swipeContainer.setRefreshing(false);
+                        DBTweet dbTweet = DBTweet.fromTweet(tweet);
+                        dbTweet.save();
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 }
+                swipeContainer.setRefreshing(false);
             }
 
             @Override

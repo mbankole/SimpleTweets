@@ -44,6 +44,7 @@ public class MentionsListFragment extends Fragment {
     RecyclerView rvTweets;
     private SwipeRefreshLayout swipeContainer;
     FragmentManager fm;
+    boolean connected;
 
     public MentionsListFragment() {}
 
@@ -60,7 +61,10 @@ public class MentionsListFragment extends Fragment {
 
     public void setFm(FragmentManager fm) {
         this.fm = fm;
+    }
 
+    public void setConnected(boolean connected) {
+        this.connected = connected;
     }
 
     @Nullable
@@ -92,7 +96,7 @@ public class MentionsListFragment extends Fragment {
             @Override
             public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
                 //Toast.makeText(context, "WHAT MORE", Toast.LENGTH_LONG).show();
-                //loadMoreTimeline(totalItemsCount - 1);
+                if (connected) loadMoreTimeline(totalItemsCount - 1);
             }
         };
         rvTweets.addOnScrollListener(scroller);
@@ -110,7 +114,7 @@ public class MentionsListFragment extends Fragment {
                 // Make sure you call swipeContainer.setRefreshing(false)
                 // once the network request has completed successfully.
                 tweetAdapter.clear();
-                populateTimeline();
+                if (connected) populateTimeline();
             }
         });
 
@@ -121,7 +125,7 @@ public class MentionsListFragment extends Fragment {
                 android.R.color.holo_green_light,
                 android.R.color.holo_orange_light,
                 android.R.color.holo_red_light);
-        populateTimeline();
+        if (connected) populateTimeline();
     }
 
     private void loadMoreTimeline(int lastIndex) {

@@ -1,7 +1,11 @@
 package com.codepath.apps.restclienttemplate;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.MenuItemCompat;
@@ -12,15 +16,18 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.codepath.apps.restclienttemplate.models.Tweet;
 import com.codepath.apps.restclienttemplate.models.User;
+import com.codepath.apps.restclienttemplate.tables.TimelineTweets;
 import com.loopj.android.http.JsonHttpResponseHandler;
+import com.raizlabs.android.dbflow.sql.language.SQLite;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
 
@@ -30,6 +37,7 @@ public class TimelineActivity extends AppCompatActivity implements ComposeTweetD
 
     private TwitterClient client;
     private String TAG = "TimelineActivityStuff";
+    public boolean connected;
     TweetFragmentPagerAdapter fragmentPager;
 
 
@@ -39,9 +47,22 @@ public class TimelineActivity extends AppCompatActivity implements ComposeTweetD
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_timeline);
 
+        ConnectivityManager connectivityManager = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+        if(connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED ||
+                connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED) {
+            //we are connected to a network
+            connected = true;
+            log.d("NETTEST", "has connection");
+        }
+        else {
+            connected = false;
+            noInternetSnackBar();
+            log.d("NETTEST", "no connection");
+        }
+
         ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
         fragmentPager = new TweetFragmentPagerAdapter(getSupportFragmentManager(),
-                TimelineActivity.this);
+                TimelineActivity.this, connected);
         viewPager.setAdapter(fragmentPager);
 
         // Give the TabLayout the ViewPager
@@ -51,6 +72,20 @@ public class TimelineActivity extends AppCompatActivity implements ComposeTweetD
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         client = TwitterApp.getRestClient();
+        List<TimelineTweets> dbtweets = SQLite.select().from(TimelineTweets.class).queryList();
+        for (int i = 0; i < dbtweets.size(); i++) {
+            log.d("DBTEST", dbtweets.get(i).getBody());
+        }
+
+        TimelineTweets tweets2 = new TimelineTweets();
+        tweets2.setUid(1);
+        tweets2.setBody("wtf is with this");
+        tweets2.save();
+        TimelineTweets tweets3 = new TimelineTweets();
+        tweets3.setUid(System.currentTimeMillis());
+        tweets3.setBody("wtf is with this 3");
+        tweets3.save();
+
 
     }
 
@@ -63,13 +98,17 @@ public class TimelineActivity extends AppCompatActivity implements ComposeTweetD
             @Override
             public boolean onQueryTextSubmit(String query) {
                 // perform query here
-                Intent i = new Intent(TimelineActivity.this, SearchActivity.class);
-                i.putExtra("query", query);
-                getApplicationContext().startActivity(i);
-                // workaround to avoid issues with some emulators and keyboard devices firing twice if a keyboard enter is used
-                // see https://code.google.com/p/android/issues/detail?id=24599
-                searchView.clearFocus();
-
+                if (connected) {
+                    Intent i = new Intent(TimelineActivity.this, SearchActivity.class);
+                    i.putExtra("query", query);
+                    getApplicationContext().startActivity(i);
+                    // workaround to avoid issues with some emulators and keyboard devices firing twice if a keyboard enter is used
+                    // see https://code.google.com/p/android/issues/detail?id=24599
+                    searchView.clearFocus();
+                }
+                else {
+                    noInternetSnackBar();
+                }
                 return true;
             }
 
@@ -87,65 +126,72 @@ public class TimelineActivity extends AppCompatActivity implements ComposeTweetD
     }
 
     public void onComposeAction(MenuItem mi) {
-        showEditDialog();
+        if (connected) showEditDialog();
+        else noInternetSnackBar();
     }
 
     public void onProfileAction(MenuItem mi) {
-        Toast.makeText(this, "PROFILE", Toast.LENGTH_LONG).show();
-        showUser();
+        if (connected) showUser();
+        else noInternetSnackBar();
     }
 
     private void showEditDialog() {
-        FragmentManager fm = getSupportFragmentManager();
-        ComposeTweetDialogFragment composeTweetDialogFragment = ComposeTweetDialogFragment.newInstance("Compose New Tweet");
-        composeTweetDialogFragment.show(fm, "fragment_edit_name");
+        if (connected) {
+            FragmentManager fm = getSupportFragmentManager();
+            ComposeTweetDialogFragment composeTweetDialogFragment = ComposeTweetDialogFragment.newInstance("Compose New Tweet");
+            composeTweetDialogFragment.show(fm, "fragment_edit_name");
+        }
+        else noInternetSnackBar();
     }
 
     private  void showUser() {
         //swipeContainer.setRefreshing(true);
-        client.getUserInfo(new JsonHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                log.d("TwitterClient", response.toString());
-                try {
-                    User user = User.fromJSON(response);
-                    //swipeContainer.setRefreshing(false);
-                    Intent i = new Intent(TimelineActivity.this, UserPageActivity.class);
-                    i.putExtra("user", user);
-                    startActivity(i);
-                } catch (JSONException e) {
-                    e.printStackTrace();
+        if (connected) {
+            client.getUserInfo(new JsonHttpResponseHandler() {
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                    log.d("TwitterClient", response.toString());
+                    try {
+                        User user = User.fromJSON(response);
+                        //swipeContainer.setRefreshing(false);
+                        Intent i = new Intent(TimelineActivity.this, UserPageActivity.class);
+                        i.putExtra("user", user);
+                        startActivity(i);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        //swipeContainer.setRefreshing(false);
+                    }
+                }
+
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
+                    log.d("TwitterClient", response.toString());
                     //swipeContainer.setRefreshing(false);
                 }
-            }
 
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
-                log.d("TwitterClient", response.toString());
-                //swipeContainer.setRefreshing(false);
-            }
+                @Override
+                public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                    log.d("TwitterClient", responseString);
+                    throwable.printStackTrace();
+                    //swipeContainer.setRefreshing(false);
+                }
 
-            @Override
-            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                log.d("TwitterClient", responseString);
-                throwable.printStackTrace();
-                //swipeContainer.setRefreshing(false);
-            }
+                @Override
+                public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                    log.d("TwitterClient", errorResponse.toString());
+                    throwable.printStackTrace();
+                    //swipeContainer.setRefreshing(false);
+                }
 
-            @Override
-            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-                log.d("TwitterClient", errorResponse.toString());
-                throwable.printStackTrace();
-                //swipeContainer.setRefreshing(false);
-            }
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
-                log.d("TwitterClient", errorResponse.toString());
-                throwable.printStackTrace();
-                //swipeContainer.setRefreshing(false);
-            }
-        });
+                @Override
+                public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
+                    log.d("TwitterClient", errorResponse.toString());
+                    throwable.printStackTrace();
+                    //swipeContainer.setRefreshing(false);
+                }
+            });
+        }
+        else noInternetSnackBar();
     }
 
     public void debug(String message) {
@@ -159,5 +205,9 @@ public class TimelineActivity extends AppCompatActivity implements ComposeTweetD
         //tweets.add(0, tweet);
         //tweetAdapter.notifyItemInserted(0);
         //rvTweets.smoothScrollToPosition(0);
+    }
+
+    public void noInternetSnackBar() {
+        Snackbar.make(findViewById(R.id.viewpager), "No Internet", Snackbar.LENGTH_LONG).show();
     }
 }

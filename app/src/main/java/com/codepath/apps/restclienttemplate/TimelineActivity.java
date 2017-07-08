@@ -19,15 +19,11 @@ import android.widget.EditText;
 
 import com.codepath.apps.restclienttemplate.models.Tweet;
 import com.codepath.apps.restclienttemplate.models.User;
-import com.codepath.apps.restclienttemplate.tables.TimelineTweets;
 import com.loopj.android.http.JsonHttpResponseHandler;
-import com.raizlabs.android.dbflow.sql.language.SQLite;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
 
@@ -72,21 +68,6 @@ public class TimelineActivity extends AppCompatActivity implements ComposeTweetD
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         client = TwitterApp.getRestClient();
-        List<TimelineTweets> dbtweets = SQLite.select().from(TimelineTweets.class).queryList();
-        for (int i = 0; i < dbtweets.size(); i++) {
-            log.d("DBTEST", dbtweets.get(i).getBody());
-        }
-
-        TimelineTweets tweets2 = new TimelineTweets();
-        tweets2.setUid(1);
-        tweets2.setBody("wtf is with this");
-        tweets2.save();
-        TimelineTweets tweets3 = new TimelineTweets();
-        tweets3.setUid(System.currentTimeMillis());
-        tweets3.setBody("wtf is with this 3");
-        tweets3.save();
-
-
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {

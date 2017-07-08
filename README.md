@@ -18,6 +18,9 @@ The following **required** functionality is completed:
   * [X] User can then enter a new tweet from a second activity and then post this to twitter
   * [X] User is taken back to home timeline with new tweet visible in timeline
   * [X] Newly created tweet should be manually inserted into the timeline and not rely on a full refresh
+  * [X] User can switch between Timeline and Mention views using tabs.
+  * [X] User can navigate to view their own profile
+  * [X] User can click on the profile image in any tweet to see another user's profile.
 
 The following **optional** features are implemented:
 
@@ -38,7 +41,7 @@ The following **optional** features are implemented:
 * [X] User can view following / followers list through the profile of a user
 * [ ] Apply the popular Butterknife annotation library to reduce view boilerplate.
 * [ ] Implement collapse scrolling effects on the Twitter profile view using `CoordinatorLayout`.
-* [ ] User can **open the twitter app offline and see last loaded tweets**. Persisted in SQLite tweets are refreshed on every application launch. While "live data" is displayed when app can get it from Twitter API, it is also saved for use in an offline mode.
+* [X] User can **open the twitter app offline and see last loaded tweets**. Persisted in SQLite tweets are refreshed on every application launch. While "live data" is displayed when app can get it from Twitter API, it is also saved for use in an offline mode.
 
 The following **additional** features are implemented:
 
@@ -48,9 +51,9 @@ The following **additional** features are implemented:
 
 Here's a walkthrough of implemented user stories:
 
-<img src='http://i.imgur.com/link/to/your/gif/file.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
-
-GIF created with [LiceCap](http://www.cockos.com/licecap/).
+<img src='demo1.gif' title='Video Walkthrough' width='480' alt='Video Walkthrough' /><img src='demo2.gif' title='Video Walkthrough' width='480' alt='Video Walkthrough' />
+<img src='demo3.gif' title='Video Walkthrough' width='480' alt='Video Walkthrough' /><img src='demo4.gif' title='Video Walkthrough' width='480' alt='Video Walkthrough' /><img src='demo5.gif' title='Video Walkthrough' width='480' alt='Video Walkthrough' />
+<img src='demo5.gif' title='Video Walkthrough' width='480' alt='Video Walkthrough' /><img src='demo6.gif' title='Video Walkthrough' width='480' alt='Video Walkthrough' />
 
 ## Notes
 

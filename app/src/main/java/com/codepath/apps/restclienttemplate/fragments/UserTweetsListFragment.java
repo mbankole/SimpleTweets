@@ -142,7 +142,7 @@ public class UserTweetsListFragment extends Fragment {
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
-                log.d("TwitterClient", response.toString());
+                //log.d("TwitterClient", response.toString());
                 for (int i = 0; i < response.length(); i++) {
                     try {
                         Tweet tweet = Tweet.fromJSON(response.getJSONObject(i));

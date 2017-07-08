@@ -33,6 +33,7 @@ public class SearchActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle('"' + query + '"');
         client = TwitterApp.getRestClient();
     }
 }

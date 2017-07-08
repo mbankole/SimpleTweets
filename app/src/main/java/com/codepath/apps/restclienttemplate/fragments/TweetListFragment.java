@@ -186,7 +186,7 @@ public class TweetListFragment extends Fragment{
     private void populateTimelineDatabase() {
         List<DBTweet> dbTweetList = SQLite.select().
                 from(DBTweet.class).queryList();
-        for (int i = 0; i < dbTweetList.size(); i++) {
+        for (int i = dbTweetList.size() - 1; i >= 0; i--) {
             Tweet tweet = DBTweet.toTweet(dbTweetList.get(i));
             tweets.add(tweet);
             tweetAdapter.notifyItemInserted(tweets.size() - 1);
@@ -208,7 +208,7 @@ public class TweetListFragment extends Fragment{
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
-                log.d("TwitterClient", response.toString());
+                //log.d("TwitterClient", response.toString());
                 for (int i = 0; i < response.length(); i++) {
                     try {
                         Tweet tweet = Tweet.fromJSON(response.getJSONObject(i));

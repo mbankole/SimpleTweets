@@ -181,7 +181,7 @@ public class FollowingListFragment extends Fragment{
         client.getFollowersList(user.uid, true, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                log.d("TwitterClient", response.toString());
+                //log.d("TwitterClient", response.toString());
                 try {
                     JSONArray results = response.getJSONArray("users");
                     for (int i = 0; i < results.length(); i++) {

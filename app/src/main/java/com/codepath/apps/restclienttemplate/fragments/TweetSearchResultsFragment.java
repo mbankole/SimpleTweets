@@ -181,7 +181,7 @@ public class TweetSearchResultsFragment extends Fragment{
         client.searchTweets(query, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                log.d("TwitterClient", response.toString());
+                //log.d("TwitterClient", response.toString());
                 try {
                     JSONArray results = response.getJSONArray("statuses");
                     for (int i = 0; i < results.length(); i++) {
